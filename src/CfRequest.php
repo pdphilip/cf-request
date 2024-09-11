@@ -9,6 +9,22 @@ class CfRequest extends Request
 {
     protected $agent;
 
+    public function __construct()
+    {
+        parent::__construct();
+        $capture = Request::capture();
+        $this->initialize(
+            $capture->query->all(),
+            $capture->request->all(),
+            $capture->attributes->all(),
+            $capture->cookies->all(),
+            $capture->files->all(),
+            $capture->server->all(),
+            $capture->getContent()
+        );
+
+    }
+
     public function country(): ?string
     {
         return $this->getClientCountry();
