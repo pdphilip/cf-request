@@ -74,6 +74,10 @@ class CfRequest extends Request
         return $this->getRefererDomain();
     }
 
+    //----------------------------------------------------------------------
+    // Device and OS
+    //----------------------------------------------------------------------
+
     public function isMobile(): ?bool
     {
         return $this->getAgent()?->isMobile();
@@ -89,17 +93,36 @@ class CfRequest extends Request
         return $this->getAgent()?->isDesktop();
     }
 
+    public function isTv(): ?bool
+    {
+        return $this->getAgent()?->isTv();
+    }
+
+    public function isTouch(): ?bool
+    {
+        return $this->getAgent()?->isTouch();
+    }
+
     public function deviceType(): ?string
     {
         return $this->getAgent()?->deviceType();
     }
 
-    public function osFamily(): ?string
+    public function deviceBrand(): ?string
     {
-        return $this->getAgent()?->osFamily();
+        return $this->getAgent()?->deviceBrand();
     }
 
-    public function os(): ?string
+    public function deviceModel(): ?string
+    {
+        return $this->getAgent()?->deviceModel();
+    }
+
+    //----------------------------------------------------------------------
+    // OS
+    //----------------------------------------------------------------------
+
+    public function os(): string
     {
         return $this->getAgent()?->os();
     }
@@ -113,6 +136,20 @@ class CfRequest extends Request
     {
         return $this->getAgent()?->osVersion();
     }
+
+    public function osFamily(): ?string
+    {
+        return $this->getAgent()?->osFamily();
+    }
+
+    public function osData(): ?array
+    {
+        return $this->getAgent()?->osData();
+    }
+
+    //----------------------------------------------------------------------
+    // Browser
+    //----------------------------------------------------------------------
 
     public function browser(): ?string
     {
@@ -128,6 +165,18 @@ class CfRequest extends Request
     {
         return $this->getAgent()?->browserVersion();
     }
+
+    public function browserFamily(): ?string
+    {
+        return $this->getAgent()?->browserFamily();
+    }
+
+    public function browserData(): ?array
+    {
+        return $this->getAgent()?->browserData();
+    }
+
+    //----------------------------------------------------------------------
 
     public function detectCloudflare(): bool
     {
@@ -232,7 +281,7 @@ class CfRequest extends Request
     public function getIsBot(): ?bool
     {
         if ($this->headers->has('X-IS-BOT')) {
-            return (bool) $this->headers->get('X-IS-BOT');
+            return $this->headers->get('X-IS-BOT') == 'true';
         }
 
         return null;
