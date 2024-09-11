@@ -10,6 +10,10 @@ class CloudflareStatusController
 {
     public function index(Request $request)
     {
+        $allowStatusView = config('cf-request.allowStatusView');
+        if (! $allowStatusView) {
+            abort(403, 'Unauthorized');
+        }
 
         $hasMiddleware = false;
         try {
