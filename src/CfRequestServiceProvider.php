@@ -21,10 +21,7 @@ class CfRequestServiceProvider extends PackageServiceProvider
         $package
             ->name('cf-request')
             ->hasConfigFile()
-            ->hasViews('cf-request')
-            ->hasMigration('create_cf_request_table')
             ->hasCommand(CfRequestCommand::class)
-            ->publishesServiceProvider('CfRequestServiceProvider')
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->setName('cf-request:install')
