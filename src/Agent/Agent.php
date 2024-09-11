@@ -60,11 +60,6 @@ class Agent
 
     }
 
-    public function isTouch(): bool
-    {
-        return $this->deviceDetector->isTouchEnabled();
-    }
-
     public function isTv(): bool
     {
         return $this->deviceType == 'tv';
@@ -164,6 +159,4 @@ class Agent
             default => 'unknown',
         };
     }
-
-    private function _parseDeviceName($name) {}
 }

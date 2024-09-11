@@ -26,8 +26,6 @@ class CfRequestServiceProvider extends PackageServiceProvider
                 $command
                     ->setName('cf-request:install')
                     ->publishConfigFile()
-                    ->publishMigrations()
-                    ->askToRunMigrations()
                     ->copyAndRegisterServiceProviderInApp()
                     ->askToStarRepoOnGitHub('pdphilip/cf-request');
             });

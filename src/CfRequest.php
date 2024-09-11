@@ -98,11 +98,6 @@ class CfRequest extends Request
         return $this->getAgent()?->isTv();
     }
 
-    public function isTouch(): ?bool
-    {
-        return $this->getAgent()?->isTouch();
-    }
-
     public function deviceType(): ?string
     {
         return $this->getAgent()?->deviceType();

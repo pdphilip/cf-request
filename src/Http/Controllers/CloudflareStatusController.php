@@ -38,7 +38,6 @@ class CloudflareStatusController
                 'CfRequest::isTablet()' => CfRequest::isTablet(),
                 'CfRequest::isDesktop()' => CfRequest::isDesktop(),
                 'CfRequest::isTv()' => CfRequest::isTv(),
-                'CfRequest::isTouch()' => CfRequest::isTouch(),
                 'CfRequest::deviceType()' => CfRequest::deviceType(),
                 'CfRequest::deviceBrand()' => CfRequest::deviceBrand(),
                 'CfRequest::deviceModel()' => CfRequest::deviceModel(),
