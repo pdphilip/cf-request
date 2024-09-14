@@ -54,8 +54,8 @@ public function register(CfRequest $request)
 ### Set the timezone based on the origin
 
 ```php
-date_default_timezone_set(CfRequest::timezone();
-// now carbon dates will be parsed for the user's timezone
+date_default_timezone_set(CfRequest::timezone());
+// Now carbon dates will be parsed for the user's timezone
 ```
 
 ### Apply logic based on the user's country
@@ -87,7 +87,7 @@ public function welcome()
 ## Requirements
 
 - Laravel 10+
-- Cloudflare as a proxy (though will work without it and have no data on the CF specific headers)
+- Cloudflare as a proxy (though it will work without it and have no data on the CF-specific headers)
 
 ## Installation
 
@@ -103,7 +103,7 @@ Then install with:
 php artisan cf-request:install
 ```
 
-Next, set the required Cloudflare headers
+Next, set the required Cloudflare headers.
 
 ### Option 1: Via Cloudflare API
 
@@ -167,9 +167,9 @@ You can use the `CfRequest` facade or inject the `CfRequest $request` class into
 
 ## Testing headers
 
-- This package comes with a test route that will display the headers that are being parsed from Cloudflare.
+- This package comes with a test route that will display the headers being parsed from Cloudflare.
 - You can access this route by visiting `/cf-request/status` on your application.
-- You can disable this in the config file, or by setting the `CF_ALLOW_STATUS_VIEW` environment variable to `false`.
+- You can disable this in the config file or by setting the `CF_ALLOW_STATUS_VIEW` environment variable to `false`.
 
 ## Changelog
 
