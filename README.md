@@ -4,6 +4,8 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) [![Total Downloads](https://img.shields.io/packagist/dt/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request)
 
+</div>
+
 Cloudflare Laravel Request inherits the request object from Laravel and parses specific headers from Cloudflare to provide additional information about the request, including:
 
 - Original Client IP (Before it passes through any proxies)
@@ -17,7 +19,7 @@ Cloudflare Laravel Request inherits the request object from Laravel and parses s
 - If it's a bot
 - Threat Score from Cloudflare
 
-The User Agent is also parsed to provide additional information about the device, including:
+The User-Agent is also parsed to provide additional information about the device, including:
 
 - Device Type (mobile, tablet, desktop, tv, etc)
 - Device Brand
@@ -26,8 +28,6 @@ The User Agent is also parsed to provide additional information about the device
 - Device OS Version
 - Device Browser
 - Device Browser Version
-
-</div>
 
 ## Highlights
 
