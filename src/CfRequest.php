@@ -387,4 +387,38 @@ class CfRequest extends Request
 
         return $this->headers->get('User-Agent');
     }
+
+    //----------------------------------------------------------------------
+    // Methods that require the original request for getting trusted values
+    //----------------------------------------------------------------------
+
+    public function getBaseUrl(): string
+    {
+        return $this->originalRequest->getBaseUrl();
+    }
+
+    public function getClientIps(): array
+    {
+        return $this->originalRequest->getClientIps();
+    }
+
+    public function getPort(): int|string|null
+    {
+        return $this->originalRequest->getPort();
+    }
+
+    public function isSecure(): bool
+    {
+        return $this->originalRequest->isSecure();
+    }
+
+    public function getHost(): string
+    {
+        return $this->originalRequest->getHost();
+    }
+
+    public function isFromTrustedProxy(): bool
+    {
+        return $this->originalRequest->isFromTrustedProxy();
+    }
 }
