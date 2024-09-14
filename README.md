@@ -29,6 +29,11 @@ The User-Agent is also parsed to provide additional information about the device
 - `CfRequest::browser()` - Device Browser
 - `CfRequest::browserVersion()` - Device Browser Version
 
+With this package, you can:
+
+- Replace `Request $request` with `CfRequest $request` in your controller methods to access the additional methods.
+- Call the `CfRequest` facade anywhere in your application to access this information.
+
 ## Highlights
 
 ### Lean into Cloudflare's Security
