@@ -36,18 +36,18 @@ The User-Agent is also parsed to provide additional information about the device
 ```php
 public function register(CfRequest $request)
 {
-   if ($request->isBot()) {
-       abort(403,'Naughty bots');
-   }
-   if ($request->threatScore() > 50) {
-       abort(403,'Thanks but no thanks');
-   }
-   $attributes = $request->validate([
-         'first_name' => 'required|string',
-         'last_name' => 'required|string',
-         //... etc
+    if ($request->isBot()) {
+        abort(403, 'Naughty bots');
+    }
+    if ($request->threatScore() > 50) {
+        abort(403, 'Thanks but no thanks');
+    }
+    $attributes = $request->validate([
+        'first_name' => 'required|string',
+        'last_name' => 'required|string',
+        //... etc
     ]);
-]);
+   //... etc
 }
 ```
 
