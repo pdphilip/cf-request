@@ -103,7 +103,7 @@ Then install with:
 php artisan cf-request:install
 ```
 
-Next, set the required Cloudflare headers.
+## Cloudflare Setup
 
 ### Option 1: Via Cloudflare API
 
