@@ -9,19 +9,38 @@ class CfRequest extends Request
 {
     protected $agent;
 
-    public function __construct()
+    protected Request $originalRequest;
+
+    public function __construct(Request $request)
     {
         parent::__construct();
-        $capture = Request::capture();
+        $this->originalRequest = $request;
+
         $this->initialize(
-            $capture->query->all(),
-            $capture->request->all(),
-            $capture->attributes->all(),
-            $capture->cookies->all(),
-            $capture->files->all(),
-            $capture->server->all(),
-            $capture->getContent()
+            $request->query->all(),
+            $request->request->all(),
+            $request->attributes->all(),
+            $request->cookies->all(),
+            $request->files->all(),
+            $request->server->all(),
+            $request->getContent()
         );
+        $this->languages = $request->languages;
+        $this->charsets = $request->charsets;
+        $this->encodings = $request->encodings;
+        $this->acceptableContentTypes = $request->acceptableContentTypes;
+        $this->pathInfo = $request->pathInfo;
+        $this->requestUri = $request->requestUri;
+        $this->baseUrl = $request->baseUrl;
+        $this->method = $request->method;
+        $this->format = $request->format;
+        $this->session = $request->session;
+        $this->locale = $request->locale;
+        $this->defaultLocale = $request->defaultLocale;
+        $this->json = $request->json;
+        $this->convertedFiles = $request->convertedFiles;
+        $this->userResolver = $request->userResolver;
+        $this->routeResolver = $request->routeResolver;
 
     }
 

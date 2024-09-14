@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Facade;
  */
 class CfRequest extends Facade
 {
-    public static function getFacadeAccessor()
+    public static function getFacadeRoot()
     {
-        return \PDPhilip\CfRequest\CfRequest::class;
+        return new \PDPhilip\CfRequest\CfRequest(app('request'));
     }
 }

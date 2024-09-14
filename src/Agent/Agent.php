@@ -25,7 +25,10 @@ class Agent
         'family' => 'unknown',
     ];
 
-    protected array $device = [];
+    protected array $device = [
+        'brand' => 'unknown',
+        'model' => 'unknown',
+    ];
 
     protected string $deviceType = 'unknown';
 
@@ -41,7 +44,6 @@ class Agent
             'brand' => $this->deviceDetector->getBrandName(),
             'model' => $this->deviceDetector->getModel(),
         ];
-        //        $this->browserData = $browser->getAll($userAgent);
     }
 
     public function isMobile(): bool

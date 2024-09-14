@@ -13,11 +13,6 @@ class CfRequestServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('cf-request')
             ->hasConfigFile()
@@ -31,7 +26,14 @@ class CfRequestServiceProvider extends PackageServiceProvider
             });
     }
 
-    public function packageRegistered()
+    public function packageBooted(): void
+    {
+        $this->app->bind(CfRequest::class, function ($app) {
+            return new CfRequest($app['request']);
+        });
+    }
+
+    public function packageRegistered(): void
     {
         Route::get('/cf-request/status', [CloudflareStatusController::class, 'index'])->name('cf-request.status');
     }
