@@ -116,20 +116,22 @@ php artisan cf-request:install
 
 <summary>Option 1: Via Cloudflare API</summary>
 
-## Step 1: Copy Zone ID
+---
+
+### Step 1: Copy Zone ID
 
 - Go to your Cloudflare dashboard
 - Click on the domain you want to configure
 - Copy the Zone ID
 - Save in ENV as `CF_API_ZONE_ID`
 
-## Step 2: Create an API Token
+### Step 2: Create an API Token
 
 - Navigate to: https://dash.cloudflare.com/profile/api-tokens
 - Click on "Create Token"
 - Select: Create Custom Token (Get started)
 
-### Token Configuration
+#### Token Configuration
 
 - {Enter Token name}
 - Permissions
@@ -147,6 +149,7 @@ php artisan cf-request:install
 ```bash
 php artisan cf-request:headers
 ```
+---
 
 </details>
 
@@ -155,7 +158,8 @@ php artisan cf-request:headers
 
 <summary>Option 2: Manually on Cloudflare</summary>
 
-## Navigate to "Modify Request Header"
+---
+### Navigate to "Modify Request Header"
 
 - Go to your Cloudflare dashboard
 - Click on the domain you want to configure
@@ -163,66 +167,65 @@ php artisan cf-request:headers
 - Select "Modify Request Header" tab
 - Click "Create a Rule"
 
-## Creating the rule
+### Creating the rule
 
 - Name: "Laravel Headers:
 - Select "All incoming requests"
 - Set the following headers:
 
-> Set dynamic
-> X-AGENT
+> Set dynamic    
+> X-AGENT    
 > http.user_agent
 
-> Set dynamic
-> X-IP
+> Set dynamic    
+> X-IP    
 > ip.src
 
-> Set dynamic
-> X-COUNTRY
+> Set dynamic    
+> X-COUNTRY    
 > ip.src.country
 
-> Set dynamic
-> X-CONTINENT
+> Set dynamic    
+> X-CONTINENT    
 > ip.src.continent
 
-> Set dynamic
-> X-CITY
+> Set dynamic    
+> X-CITY    
 > ip.src.city
 
-> Set dynamic
-> X-POSTAL-CODE
+> Set dynamic    
+> X-POSTAL-CODE    
 > ip.src.postal_code
 
-> Set dynamic
-> X-REGION
+> Set dynamic    
+> X-REGION    
 > ip.src.region
 
-> Set dynamic
-> X-TIMEZONE
+> Set dynamic    
+> X-TIMEZONE    
 > ip.src.timezone.name
 
-> Set dynamic
-> X-LAT
+> Set dynamic    
+> X-LAT    
 > ip.src.lat
 
-> Set dynamic
-> X-LON
+> Set dynamic    
+> X-LON    
 > ip.src.lon
 
-> Set dynamic
-> X-REFERER
+> Set dynamic    
+> X-REFERER    
 > http.referer
 
-> Set dynamic
-> X-IS-BOT
+> Set dynamic    
+> X-IS-BOT    
 > cf.client.bot
 
-> Set dynamic
-> X-THREAT-SCORE
+> Set dynamic    
+> X-THREAT-SCORE    
 > cf.threat_score
 
-
-
+---
 
 </details>
 
