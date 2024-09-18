@@ -2,6 +2,12 @@
 
 All notable changes to `Cloudflare Laravel Request` will be documented in this file.
 
+## v1.0.1 - 2024-09-18
+
+- Removed Middleware option
+
+**Full Changelog**: https://github.com/pdphilip/cf-request/compare/v1.0.0...v1.0.1
+
 ## v1.0.0 - 2024-09-18
 
 ### Initial Release
