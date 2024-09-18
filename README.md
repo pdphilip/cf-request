@@ -4,7 +4,7 @@
 
 <img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request.png" alt="Cloudflare Laravel Request" />
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) [![Total Downloads](https://img.shields.io/packagist/dt/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) 
 
 </div>
 
@@ -125,6 +125,8 @@ php artisan cf-request:install
 - Copy the Zone ID
 - Save in ENV as `CF_API_ZONE_ID`
 
+<img src="https://cdn.snipform.io/pdphilip/cf-request/zoneId.png" alt="Cloudflare Laravel Request - zoneid" />
+
 ### Step 2: Create an API Token
 
 - Navigate to: https://dash.cloudflare.com/profile/api-tokens
@@ -142,6 +144,8 @@ php artisan cf-request:install
 - Zone Resources
     - Include: All Zones
 
+<img src="https://cdn.snipform.io/pdphilip/cf-request/token-perms.png" alt="Cloudflare Laravel Request - token perms" />
+
 - Create Token and Save in ENV as `CF_API_TOKEN`
 
 ## Run the artisan command:
@@ -149,6 +153,8 @@ php artisan cf-request:install
 ```bash
 php artisan cf-request:headers
 ```
+<img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request-headers.gif" alt="Cloudflare Laravel Request - artisan" />
+
 ---
 
 </details>
