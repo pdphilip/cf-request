@@ -20,8 +20,8 @@ class ApiResponse
 
     public function __construct()
     {
-        $this->token = config('cf-agent.cf.token');
-        $this->apiBase = config('cf-agent.cf.api');
+        $this->token = config('cf-request.cloudflare.token');
+        $this->apiBase = config('cf-request.cloudflare.api');
     }
 
     public function requestHeaders(): array
@@ -122,6 +122,17 @@ class ApiResponse
         $api->code = $code;
         $api->message = $message;
         $api->result = 'error';
+
+        return $api;
+    }
+
+    public static function setOk($message)
+    {
+        $api = new ApiResponse;
+        $api->success = true;
+        $api->code = 200;
+        $api->message = $message;
+        $api->result = 'ok';
 
         return $api;
     }

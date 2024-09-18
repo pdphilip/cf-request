@@ -12,7 +12,7 @@ class TransformRules
 
     public function __construct()
     {
-        $this->zoneId = config('cf-agent.cf.zoneId');
+        $this->zoneId = config('cf-request.cloudflare.zoneId');
 
     }
 
@@ -23,7 +23,7 @@ class TransformRules
 
     public function setRulesetId(): bool
     {
-        $rulesetId = $this->setRulesetId();
+        $rulesetId = $this->getRulesetId();
         if ($rulesetId) {
             $this->rulesetId = $rulesetId;
 
@@ -105,7 +105,7 @@ class TransformRules
 
             $existing = $this->verifyHeaders();
             if ($existing) {
-                return ApiResponse::setError(400, 'Laravel Headers already set');
+                return ApiResponse::setOk('required headers have already been set');
             }
             $endpoint = '/zones/'.$this->zoneId.'/rulesets/'.$this->rulesetId.'/rules';
             $payload['action'] = 'rewrite';
