@@ -2,31 +2,20 @@
 
 namespace PDPhilip\CfRequest\Http\Controllers;
 
-use Exception;
-use Illuminate\Http\Request;
+use PDPhilip\CfRequest\CfRequest as Request;
 use PDPhilip\CfRequest\Facades\CfRequest;
 
 class CloudflareStatusController
 {
-    public function index(Request $request)
+    public function index()
     {
         $allowStatusView = config('cf-request.allowStatusView');
         if (! $allowStatusView) {
             abort(403, 'Unauthorized');
         }
 
-        $hasMiddleware = false;
-        try {
-            //@phpstan-ignore-next-line
-            $request->detectCloudflare();
-            $hasMiddleware = true;
-        } catch (Exception $e) {
-
-        }
-
         return [
-            'Middleware Loaded (CfRequestMiddleware)' => $hasMiddleware,
-            'Cloudflare Headers' => CfRequest::detectCloudflare(),
+            'Cloudflare Headers Present' => CfRequest::detectCloudflare(),
             'location' => [
                 'CfRequest::country()' => CfRequest::country(),
                 'CfRequest::timezone()' => CfRequest::timezone(),
@@ -65,6 +54,57 @@ class CloudflareStatusController
             'CfRequest::threatScore()' => CfRequest::threatScore(),
             'CfRequest::referer()' => CfRequest::referer(),
             'CfRequest::refererDomain()' => CfRequest::refererDomain(),
+        ];
+
+    }
+
+    public function indexAsRequest(Request $request)
+    {
+        $allowStatusView = config('cf-request.allowStatusView');
+        if (! $allowStatusView) {
+            abort(403, 'Unauthorized');
+        }
+
+        return [
+            'Cloudflare Headers Present' => $request->detectCloudflare(),
+            'location' => [
+                '$request->country()' => $request->country(),
+                '$request->timezone()' => $request->timezone(),
+                '$request->city()' => $request->city(),
+                '$request->region()' => $request->region(),
+                '$request->postalCode()' => $request->postalCode(),
+                '$request->lat()' => $request->lat(),
+                '$request->lon()' => $request->lon(),
+                '$request->geo()' => $request->geo(),
+            ],
+            'device' => [
+                '$request->isMobile()' => $request->isMobile(),
+                '$request->isTablet()' => $request->isTablet(),
+                '$request->isDesktop()' => $request->isDesktop(),
+                '$request->isTv()' => $request->isTv(),
+                '$request->deviceType()' => $request->deviceType(),
+                '$request->deviceBrand()' => $request->deviceBrand(),
+                '$request->deviceModel()' => $request->deviceModel(),
+            ],
+            'os' => [
+                '$request->os()' => $request->os(),
+                '$request->osName()' => $request->osName(),
+                '$request->osVersion()' => $request->osVersion(),
+                '$request->osFamily()' => $request->osFamily(),
+                '$request->osData()' => $request->osData(),
+            ],
+            'browser' => [
+                '$request->browser()' => $request->browser(),
+                '$request->browserName()' => $request->browserName(),
+                '$request->browserVersion()' => $request->browserVersion(),
+                '$request->browserFamily()' => $request->browserFamily(),
+                '$request->browserData()' => $request->browserData(),
+            ],
+            '$request->ip()' => $request->ip(),
+            '$request->isBot()' => $request->isBot(),
+            '$request->threatScore()' => $request->threatScore(),
+            '$request->referer()' => $request->referer(),
+            '$request->refererDomain()' => $request->refererDomain(),
         ];
 
     }

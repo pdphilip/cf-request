@@ -36,5 +36,6 @@ class CfRequestServiceProvider extends PackageServiceProvider
     public function packageRegistered(): void
     {
         Route::get('/cf-request/status', [CloudflareStatusController::class, 'index'])->name('cf-request.status');
+        Route::get('/cf-request/status-request', [CloudflareStatusController::class, 'indexAsRequest'])->name('cf-request.status-request');
     }
 }
