@@ -37,9 +37,15 @@ class Agent
         $clientHints = ClientHints::factory($_SERVER);
         $this->deviceDetector = new DeviceDetector($userAgent, $clientHints);
         $this->deviceDetector->parse();
+
+        $this->deviceType = $this->_parseDeviceType($this->deviceDetector->getDevice());
+        $this->device = [
+            'brand' => $this->deviceDetector->getBrandName(),
+            'model' => $this->deviceDetector->getModel(),
+        ];
+
         $this->_setBrowser();
         $this->_setOs();
-        $this->_setDevice();
 
     }
 
@@ -168,24 +174,11 @@ class Agent
 
     }
 
-    public function _setOs(): void
+    private function _setOs(): void
     {
         $os = $this->deviceDetector->getOs();
         if ($os) {
             $this->os = $os;
         }
-    }
-
-    public function _setDevice(): void
-    {
-        $device = $this->deviceDetector->getDevice();
-        if ($device) {
-            $this->deviceType = $this->_parseDeviceType($device);
-            $this->device = [
-                'brand' => $this->deviceDetector->getBrandName(),
-                'model' => $this->deviceDetector->getModel(),
-            ];
-        }
-
     }
 }
