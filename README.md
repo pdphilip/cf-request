@@ -18,7 +18,7 @@ Cloudflare Laravel Request inherits the request object from Laravel and parses s
 - `CfRequest::postalCode()` - Origin Postal Code
 - `CfRequest::lat()` - Origin Latitude
 - `CfRequest::lon()` - Origin Longitude
-- `fRequest::isBot()` - If it's a bot
+- `CfRequest::isBot()` - If it's a bot
 - `CfRequest::threatScore()` - Threat Score from Cloudflare
 
 The User-Agent is also parsed to provide additional information about the device, including:
@@ -35,6 +35,8 @@ With this package, you can:
 
 - Replace `Request $request` with `CfRequest $request` in your controller methods to access the additional methods.
 - Call the `CfRequest` facade anywhere in your application to access this information.
+
+[CF Request in action: Test your connection](https://app.snipform.io/cf-request/status)
 
 ## Highlights
 
