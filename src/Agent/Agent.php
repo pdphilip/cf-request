@@ -13,16 +13,16 @@ class Agent
     protected array $browser = [
         'type' => 'unknown',
         'name' => 'unknown',
-        'version' => 'unknown',
+        'version' => '',
         'engine' => 'unknown',
-        'engine_version' => 'unknown',
+        'engine_version' => '',
         'family' => 'unknown',
     ];
 
     protected array $os = [
         'name' => 'unknown',
-        'version' => 'unknown',
-        'family' => 'unknown',
+        'version' => '',
+        'family' => '',
     ];
 
     protected array $device = [
@@ -37,13 +37,10 @@ class Agent
         $clientHints = ClientHints::factory($_SERVER);
         $this->deviceDetector = new DeviceDetector($userAgent, $clientHints);
         $this->deviceDetector->parse();
-        $this->browser = $this->deviceDetector->getClient();
-        $this->os = $this->deviceDetector->getOs();
-        $this->deviceType = $this->_parseDeviceType($this->deviceDetector->getDevice());
-        $this->device = [
-            'brand' => $this->deviceDetector->getBrandName(),
-            'model' => $this->deviceDetector->getModel(),
-        ];
+        $this->_setBrowser();
+        $this->_setOs();
+        $this->_setDevice();
+
     }
 
     public function isMobile(): bool
@@ -160,5 +157,35 @@ class Agent
             AbstractDeviceParser::DEVICE_TYPE_PERIPHERAL => 'peripheral',
             default => 'unknown',
         };
+    }
+
+    private function _setBrowser(): void
+    {
+        $browser = $this->deviceDetector->getClient();
+        if ($browser) {
+            $this->browser = $browser;
+        }
+
+    }
+
+    public function _setOs(): void
+    {
+        $os = $this->deviceDetector->getOs();
+        if ($os) {
+            $this->os = $os;
+        }
+    }
+
+    public function _setDevice(): void
+    {
+        $device = $this->deviceDetector->getDevice();
+        if ($device) {
+            $this->deviceType = $this->_parseDeviceType($device);
+            $this->device = [
+                'brand' => $this->deviceDetector->getBrandName(),
+                'model' => $this->deviceDetector->getModel(),
+            ];
+        }
+
     }
 }
