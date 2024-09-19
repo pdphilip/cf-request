@@ -2,6 +2,12 @@
 
 All notable changes to `Cloudflare Laravel Request` will be documented in this file.
 
+## v1.0.2 - 2024-09-19
+
+Bug fix: Agent was failing when the browser was not detectable
+
+**Full Changelog**: https://github.com/pdphilip/cf-request/compare/v1.0.1...v1.0.2
+
 ## v1.0.1 - 2024-09-18
 
 - Removed Middleware option
