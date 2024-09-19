@@ -155,7 +155,7 @@ class CfRequest extends Request
     // OS
     //----------------------------------------------------------------------
 
-    public function os(): string
+    public function os(): ?string
     {
         return $this->getAgent()?->os();
     }
