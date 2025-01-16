@@ -124,7 +124,11 @@ class Agent
 
     public function browser(): string
     {
-        return $this->browser['name'].' '.$this->browser['version'];
+        if ($this->browser['version']) {
+            return $this->browser['name'].' '.$this->browser['version'];
+        }
+
+        return $this->browser['name'];
     }
 
     public function browserFamily(): string
