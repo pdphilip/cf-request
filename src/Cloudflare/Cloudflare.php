@@ -41,7 +41,7 @@ class Cloudflare
     public static function getCfHeaders(): array
     {
         $cf = new TransformRules;
-        //look up
+        // look up
         $res = $cf->getResponseHeadersRuleset();
 
         return $res->asArray();
