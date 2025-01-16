@@ -4,7 +4,10 @@
 
 <img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request.png" alt="Cloudflare Laravel Request" />
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) 
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) 
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) 
+[![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/cf-request.svg)](https://packagist.org/packages/pdphilip/cf-request)
 
 </div>
 
