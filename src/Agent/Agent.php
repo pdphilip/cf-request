@@ -78,7 +78,11 @@ class Agent
 
     public function os(): string
     {
-        return $this->os['name'].' '.$this->os['version'];
+        if ($this->os['version']) {
+            return $this->os['name'].' '.$this->os['version'];
+        }
+
+        return $this->os['name'];
     }
 
     public function osName()
