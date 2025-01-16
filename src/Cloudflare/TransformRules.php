@@ -2,7 +2,7 @@
 
 namespace PDPhilip\CfRequest\Cloudflare;
 
-//https://developers.cloudflare.com/api/operations/createZoneRuleset
+// https://developers.cloudflare.com/api/operations/createZoneRuleset
 
 class TransformRules
 {
