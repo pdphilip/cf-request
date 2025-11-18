@@ -97,9 +97,52 @@ class CfRequest extends Request
         return $this->getIsBot();
     }
 
-    public function threatScore(): ?int
+    public function botScore(): ?int
     {
-        return $this->getThreatScore();
+        return $this->getBotScore();
+    }
+
+    public function botScoreData(): array
+    {
+        $score = $this->getBotScore();
+        $key = 'no_header';
+        $isBot = null;
+        $value = 'CF header not found';
+        if ($score === null) {
+            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+        }
+        if ($score === 0) {
+            $key = 'not_computed';
+            $value = 'CF did not compute a score (Bot score is a pro feature on CF)';
+
+            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+        }
+        if ($score === 1) {
+            $key = 'automated';
+            $isBot = true;
+            $value = 'Automated Bot';
+
+            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+        }
+
+        if ($score <= 29) {
+            $key = 'likely_automated';
+            $isBot = true;
+            $value = 'Likely Automated Bot (Range 2 to 29)';
+
+            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+
+        }
+        $isBot = false;
+        $key = 'likely_human';
+        $value = 'Likely Human (Range 30 to 99)';
+        if ($score == 99) {
+            $key = 'human';
+            $value = 'Human (Max score)';
+        }
+
+        return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+
     }
 
     public function referer(): ?string
@@ -313,17 +356,13 @@ class CfRequest extends Request
 
     public function getIsBot(): ?bool
     {
-        if ($this->headers->has('X-IS-BOT')) {
-            return $this->headers->get('X-IS-BOT') == 'true';
-        }
-
-        return null;
+        return $this->getAgent()?->isBot();
     }
 
-    public function getThreatScore(): ?int
+    public function getBotScore(): ?int
     {
-        if ($this->headers->has('X-THREAT-SCORE')) {
-            return (int) $this->headers->get('X-THREAT-SCORE');
+        if ($this->headers->has('X-BOT-SCORE')) {
+            return (int) $this->headers->get('X-BOT-SCORE');
         }
 
         return null;
@@ -346,6 +385,15 @@ class CfRequest extends Request
         }
 
         return $referer;
+    }
+
+    public function getHeader($key): mixed
+    {
+        if ($this->headers->has($key)) {
+            return $this->headers->get($key);
+        }
+
+        return null;
     }
 
     protected function getAgent()
@@ -423,5 +471,19 @@ class CfRequest extends Request
     public function isFromTrustedProxy(): bool
     {
         return $this->originalRequest->isFromTrustedProxy();
+    }
+
+    // ----------------------------------------------------------------------
+    // Protected
+    // ----------------------------------------------------------------------
+
+    private function _returnBotData($payload)
+    {
+        return [
+            'score' => $payload['score'],
+            'is_bot' => $payload['isBot'],
+            'key' => $payload['key'],
+            'value' => $payload['value'],
+        ];
     }
 }

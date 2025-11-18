@@ -32,6 +32,8 @@ class Agent
 
     protected string $deviceType = 'unknown';
 
+    protected bool $bot = false;
+
     public function __construct($userAgent)
     {
         $clientHints = ClientHints::factory($_SERVER);
@@ -46,6 +48,9 @@ class Agent
 
         $this->_setBrowser();
         $this->_setOs();
+        if ($this->deviceDetector->isBot()) {
+            $this->bot = true;
+        }
 
     }
 
@@ -68,6 +73,11 @@ class Agent
     public function isTv(): bool
     {
         return $this->deviceType == 'tv';
+    }
+
+    public function isBot(): bool
+    {
+        return $this->bot;
     }
 
     public function deviceType(): string
@@ -169,7 +179,7 @@ class Agent
             AbstractDeviceParser::DEVICE_TYPE_SMART_SPEAKER => 'speaker',
             AbstractDeviceParser::DEVICE_TYPE_WEARABLE => 'wearable',
             AbstractDeviceParser::DEVICE_TYPE_PERIPHERAL => 'peripheral',
-            default => 'unknown',
+            default => 'unknown ('.$device.')',
         };
     }
 

@@ -4,9 +4,9 @@
 
 <img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request.png" alt="Cloudflare Laravel Request" />
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request) 
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain) 
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain) 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/cf-request.svg)](https://packagist.org/packages/pdphilip/cf-request)
 
 </div>
@@ -158,6 +158,7 @@ php artisan cf-request:install
 ```bash
 php artisan cf-request:headers
 ```
+
 <img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request-headers.gif" alt="Cloudflare Laravel Request - artisan" />
 
 ---
@@ -170,6 +171,7 @@ php artisan cf-request:headers
 <summary>Option 2: Manually on Cloudflare</summary>
 
 ---
+
 ### Navigate to "Modify Request Header"
 
 - Go to your Cloudflare dashboard
@@ -260,8 +262,6 @@ All the standard Laravel request methods are available, with the following addit
 
 ### `CfRequest::isBot()`
 
-### `CfRequest::threatScore()`
-
 ### `CfRequest::isMobile()`
 
 ### `CfRequest::isTablet()`
@@ -293,6 +293,10 @@ All the standard Laravel request methods are available, with the following addit
 ### `CfRequest::referer()`
 
 ### `CfRequest::refererDomain()`
+
+### `CfRequest::botScore()` (Cloudflare Pro or above required)
+
+### `CfRequest::botScoreData()` (Cloudflare Pro or above required)
 
 You can use the `CfRequest` facade or inject the `CfRequest $request` class into your controller methods.
 

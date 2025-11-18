@@ -134,7 +134,6 @@ class TransformRules
                         'operation' => 'set',
                         'expression' => 'ip.src.region',
                     ],
-
                     'X-CONTINENT' => [
                         'operation' => 'set',
                         'expression' => 'ip.src.continent',
@@ -159,13 +158,9 @@ class TransformRules
                         'operation' => 'set',
                         'expression' => 'http.referer',
                     ],
-                    'X-IS-BOT' => [
+                    'X-BOT-SCORE' => [
                         'operation' => 'set',
-                        'expression' => 'cf.client.bot',
-                    ],
-                    'X-THREAT-SCORE' => [
-                        'operation' => 'set',
-                        'expression' => 'cf.threat_score',
+                        'expression' => 'cf.bot_management.score',
                     ],
                 ],
 

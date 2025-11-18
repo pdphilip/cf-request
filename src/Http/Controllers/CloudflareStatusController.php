@@ -51,7 +51,8 @@ class CloudflareStatusController
             ],
             'CfRequest::ip()' => CfRequest::ip(),
             'CfRequest::isBot()' => CfRequest::isBot(),
-            'CfRequest::threatScore()' => CfRequest::threatScore(),
+            'CfRequest::botScore()' => CfRequest::botScore(),
+            'CfRequest::botScoreData()' => CfRequest::botScoreData(),
             'CfRequest::referer()' => CfRequest::referer(),
             'CfRequest::refererDomain()' => CfRequest::refererDomain(),
         ];
@@ -102,7 +103,8 @@ class CloudflareStatusController
             ],
             '$request->ip()' => $request->ip(),
             '$request->isBot()' => $request->isBot(),
-            '$request->threatScore()' => $request->threatScore(),
+            '$request->botScore()' => $request->botScore(),
+            '$request->botScoreData()' => $request->botScoreData(),
             '$request->referer()' => $request->referer(),
             '$request->refererDomain()' => $request->refererDomain(),
         ];
