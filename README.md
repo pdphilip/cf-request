@@ -21,8 +21,8 @@ Cloudflare Laravel Request inherits the request object from Laravel and parses s
 - `CfRequest::postalCode()` - Origin Postal Code
 - `CfRequest::lat()` - Origin Latitude
 - `CfRequest::lon()` - Origin Longitude
-- `CfRequest::isBot()` - If it's a bot
-- `CfRequest::threatScore()` - Threat Score from Cloudflare
+- `CfRequest::botScore()` - Bot Score from Cloudflare (Pro plan or higher required)
+- `CfRequest::botScoreData()` - Bot Score data from Cloudflare (Pro plan or higher required)
 
 The User-Agent is also parsed to provide additional information about the device, including:
 
@@ -33,6 +33,7 @@ The User-Agent is also parsed to provide additional information about the device
 - `CfRequest::osVersion()` - Device OS Version
 - `CfRequest::browser()` - Device Browser
 - `CfRequest::browserVersion()` - Device Browser Version
+- `CfRequest::isBot()` - If it's a bot
 
 With this package, you can:
 
@@ -51,9 +52,7 @@ public function register(CfRequest $request)
     if ($request->isBot()) {
         abort(403, 'Naughty bots');
     }
-    if ($request->threatScore() > 50) {
-        abort(403, 'Thanks but no thanks');
-    }
+ 
     $attributes = $request->validate([
         'first_name' => 'required|string',
         'last_name' => 'required|string',
@@ -230,13 +229,9 @@ php artisan cf-request:headers
 > X-REFERER    
 > http.referer
 
-> Set dynamic    
-> X-IS-BOT    
-> cf.client.bot
-
-> Set dynamic    
-> X-THREAT-SCORE    
-> cf.threat_score
+> Set dynamic (Pro or higher plan required on Cloudflare)
+> X-BOT-SCORE  
+> cf.bot_management.score
 
 ---
 
