@@ -318,7 +318,11 @@ class CfRequest extends Request
 
     public function getIsBot(): ?bool
     {
-        if ($this->headers->has('X-IS-BOT') && $this->headers->get('X-IS-BOT')) {
+        if ($this->headers->has('X-IS-BOT')) {
+            if ($this->headers->get('X-IS-BOT') === 'false') {
+                return $this->getAgent()?->isBot();
+            }
+
             return true;
         }
 
