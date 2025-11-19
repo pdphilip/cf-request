@@ -50,9 +50,9 @@ class CloudflareStatusController
                 'CfRequest::browserData()' => CfRequest::browserData(),
             ],
             'CfRequest::ip()' => CfRequest::ip(),
+            'CfRequest::asn()' => CfRequest::asn(),
+            'CfRequest::lang()' => CfRequest::lang(),
             'CfRequest::isBot()' => CfRequest::isBot(),
-            'CfRequest::botScore()' => CfRequest::botScore(),
-            'CfRequest::botScoreData()' => CfRequest::botScoreData(),
             'CfRequest::referer()' => CfRequest::referer(),
             'CfRequest::refererDomain()' => CfRequest::refererDomain(),
         ];
@@ -102,9 +102,9 @@ class CloudflareStatusController
                 '$request->browserData()' => $request->browserData(),
             ],
             '$request->ip()' => $request->ip(),
+            '$request->asn()' => $request->asn(),
+            '$request->lang()' => $request->lang(),
             '$request->isBot()' => $request->isBot(),
-            '$request->botScore()' => $request->botScore(),
-            '$request->botScoreData()' => $request->botScoreData(),
             '$request->referer()' => $request->referer(),
             '$request->refererDomain()' => $request->refererDomain(),
         ];

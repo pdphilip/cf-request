@@ -97,52 +97,14 @@ class CfRequest extends Request
         return $this->getIsBot();
     }
 
-    public function botScore(): ?int
+    public function asn(): ?string
     {
-        return $this->getBotScore();
+        return $this->getAsn();
     }
 
-    public function botScoreData(): array
+    public function lang(): ?string
     {
-        $score = $this->getBotScore();
-        $key = 'no_header';
-        $isBot = null;
-        $value = 'CF header not found';
-        if ($score === null) {
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-        }
-        if ($score === 0) {
-            $key = 'not_computed';
-            $value = 'CF did not compute a score (Bot score is a pro feature on CF)';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-        }
-        if ($score === 1) {
-            $key = 'automated';
-            $isBot = true;
-            $value = 'Automated Bot';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-        }
-
-        if ($score <= 29) {
-            $key = 'likely_automated';
-            $isBot = true;
-            $value = 'Likely Automated Bot (Range 2 to 29)';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-
-        }
-        $isBot = false;
-        $key = 'likely_human';
-        $value = 'Likely Human (Range 30 to 99)';
-        if ($score == 99) {
-            $key = 'human';
-            $value = 'Human (Max score)';
-        }
-
-        return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-
+        return $this->getLang();
     }
 
     public function referer(): ?string
@@ -356,13 +318,26 @@ class CfRequest extends Request
 
     public function getIsBot(): ?bool
     {
+        if ($this->headers->has('X-IS-BOT') && $this->headers->get('X-IS-BOT')) {
+            return true;
+        }
+
         return $this->getAgent()?->isBot();
     }
 
-    public function getBotScore(): ?int
+    public function getASN(): ?string
     {
-        if ($this->headers->has('X-BOT-SCORE')) {
-            return (int) $this->headers->get('X-BOT-SCORE');
+        if ($this->headers->has('X-ASN')) {
+            return (string) $this->headers->get('X-ASN');
+        }
+
+        return null;
+    }
+
+    public function getLang(): ?string
+    {
+        if ($this->headers->has('X-LANG') && $this->headers->get('X-LANG')) {
+            return (string) $this->headers->get('X-LANG');
         }
 
         return null;
@@ -471,19 +446,5 @@ class CfRequest extends Request
     public function isFromTrustedProxy(): bool
     {
         return $this->originalRequest->isFromTrustedProxy();
-    }
-
-    // ----------------------------------------------------------------------
-    // Protected
-    // ----------------------------------------------------------------------
-
-    private function _returnBotData($payload)
-    {
-        return [
-            'score' => $payload['score'],
-            'is_bot' => $payload['isBot'],
-            'key' => $payload['key'],
-            'value' => $payload['value'],
-        ];
     }
 }

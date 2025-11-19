@@ -158,9 +158,13 @@ class TransformRules
                         'operation' => 'set',
                         'expression' => 'http.referer',
                     ],
-                    'X-BOT-SCORE' => [
+                    'X-ASN' => [
                         'operation' => 'set',
-                        'expression' => 'cf.bot_management.score',
+                        'expression' => 'ip.src.asnum',
+                    ],
+                    'X-LANG' => [
+                        'operation' => 'set',
+                        'expression' => 'http.request.accepted_languages[0]',
                     ],
                 ],
 

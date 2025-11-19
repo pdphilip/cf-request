@@ -21,8 +21,9 @@ Cloudflare Laravel Request inherits the request object from Laravel and parses s
 - `CfRequest::postalCode()` - Origin Postal Code
 - `CfRequest::lat()` - Origin Latitude
 - `CfRequest::lon()` - Origin Longitude
-- `CfRequest::botScore()` - Bot Score from Cloudflare (Pro plan or higher required)
-- `CfRequest::botScoreData()` - Bot Score data from Cloudflare (Pro plan or higher required)
+- `CfRequest::isBot()` - If it's a bot
+- `CfRequest::asn()` - Autonomous System (AS) number associated with the client IP address
+- `CfRequest::lang()` - Browser's primary accepted language
 
 The User-Agent is also parsed to provide additional information about the device, including:
 
@@ -33,7 +34,6 @@ The User-Agent is also parsed to provide additional information about the device
 - `CfRequest::osVersion()` - Device OS Version
 - `CfRequest::browser()` - Device Browser
 - `CfRequest::browserVersion()` - Device Browser Version
-- `CfRequest::isBot()` - If it's a bot
 
 With this package, you can:
 
@@ -229,9 +229,13 @@ php artisan cf-request:headers
 > X-REFERER    
 > http.referer
 
-> Set dynamic (Pro or higher plan required on Cloudflare)
-> X-BOT-SCORE  
-> cf.bot_management.score
+> Set dynamic
+> X-ASN
+> ip.src.asnum
+
+> Set dynamic
+> X-LANG
+> http.request.accepted_languages[0]
 
 ---
 
@@ -289,9 +293,9 @@ All the standard Laravel request methods are available, with the following addit
 
 ### `CfRequest::refererDomain()`
 
-### `CfRequest::botScore()` (Cloudflare Pro or above required)
+### `CfRequest::asn()`
 
-### `CfRequest::botScoreData()` (Cloudflare Pro or above required)
+### `CfRequest::lang()`
 
 You can use the `CfRequest` facade or inject the `CfRequest $request` class into your controller methods.
 
