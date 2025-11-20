@@ -158,14 +158,20 @@ class TransformRules
                         'operation' => 'set',
                         'expression' => 'http.referer',
                     ],
+                    'X-IS-BOT' => [
+                        'operation' => 'set',
+                        'expression' => 'cf.client.bot',
+                    ],
                     'X-ASN' => [
                         'operation' => 'set',
                         'expression' => 'ip.src.asnum',
                     ],
+
                     'X-LANG' => [
                         'operation' => 'set',
                         'expression' => 'http.request.accepted_languages[0]',
                     ],
+
                 ],
 
             ];
