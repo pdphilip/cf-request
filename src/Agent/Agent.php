@@ -114,6 +114,11 @@ class Agent
     {
         $os = $this->os;
         unset($os['short_name']);
+        foreach ($os as $name => $value) {
+            if (! $value) {
+                unset($os[$name]);
+            }
+        }
 
         return $os;
     }

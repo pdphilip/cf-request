@@ -117,6 +117,14 @@ class CfRequest extends Request
         return $this->getRefererDomain();
     }
 
+    /**
+     * @deprecated - Cloudflare no longer has this feature. Here for backwards compatibility
+     */
+    public function threatScore(): int
+    {
+        return 0;
+    }
+
     // ----------------------------------------------------------------------
     // Device and OS
     // ----------------------------------------------------------------------
