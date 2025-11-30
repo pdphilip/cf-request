@@ -175,9 +175,8 @@ php artisan cf-request:headers
 
 - Go to your Cloudflare dashboard
 - Click on the domain you want to configure
-- Click on the "Rules -> Transform Rules" menu
-- Select "Modify Request Header" tab
-- Click "Create a Rule"
+- Click on Menu "Rulkes" -> "Overview"
+- Click on "+ Create Rule" -> select "Request Header Transform Rule"
 
 ### Creating the rule
 
@@ -229,13 +228,20 @@ php artisan cf-request:headers
 > X-REFERER    
 > http.referer
 
-> Set dynamic
-> X-ASN
-> ip.src.asnum
 
-> Set dynamic
-> X-LANG
-> http.request.accepted_languages[0]
+> Set dynamic    
+> X-ASN    
+> ip.src.asnum    
+
+
+> Set dynamic    
+> X-LANG    
+> http.request.accepted_languages[0]    
+
+> Set dynamic    
+> X-IS-BOT    
+> cf.client.bot
+
 
 ---
 
