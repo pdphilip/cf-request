@@ -175,7 +175,7 @@ php artisan cf-request:headers
 
 - Go to your Cloudflare dashboard
 - Click on the domain you want to configure
-- Click on Menu "Rulkes" -> "Overview"
+- Click on Menu "Rules" -> "Overview"
 - Click on "+ Create Rule" -> select "Request Header Transform Rule"
 
 ### Creating the rule
