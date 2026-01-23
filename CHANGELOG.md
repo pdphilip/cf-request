@@ -2,6 +2,15 @@
 
 All notable changes to `Cloudflare Laravel Request` will be documented in this file.
 
+## v2.0.4 - 2026-01-23
+
+### What's Changed
+
+* Update matomo/device-detector requirement from 6.4.7 to 6.4.8 by @dependabot[bot] in https://github.com/pdphilip/cf-request/pull/9
+* Bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 by @dependabot[bot] in https://github.com/pdphilip/cf-request/pull/10
+
+**Full Changelog**: https://github.com/pdphilip/cf-request/compare/v2.0.3...v2.0.4
+
 ## v2.0.3 - 2025-11-20
 
 ### Summary
@@ -29,6 +38,7 @@ This release adds Cloudflare ASN and primary language support, improves user-age
 ### Breaking / Behavioural changes
 
 - The old Cloudflare threat score mapping is removed. If your application relied on CfRequest::threatScore() for blocking/decisions, note that:
+  
   - CfRequest::threatScore() now returns 0 (kept only for backwards compatibility).
   - Replace threatScore-based checks with other approaches such as:
     - ASN-based allow/deny checks via CfRequest::asn().
@@ -37,6 +47,7 @@ This release adds Cloudflare ASN and primary language support, improves user-age
     
   
 - Transform rules in Cloudflare must be updated to populate X-ASN and X-LANG if you want those values available in Laravel requests.
+  
 
 
 ---
@@ -44,23 +55,30 @@ This release adds Cloudflare ASN and primary language support, improves user-age
 ### Upgrade guide
 
 1. Composer
+   
    - Run: composer update pdphilip/cf-request
    - Ensure project uses PHP 8.2+ and that illuminate/contracts compatibility with ^10 | ^11 | ^12 is acceptable.
    
 2. Cloudflare transform rules
+   
    - Update "Modify Request Header" rules to set:
+     
      - X-ASN -> ip.src.asnum
      - X-LANG -> http.request.accepted_languages[0]
      
    - Remove reliance on X-THREAT-SCORE (it is no longer used by this package).
+     
    
 3. Application code
+   
    - Replace any threatScore() logic with new strategies:
+     
      - Use $request->asn() for ASN checks (block/allow lists).
      - Use $request->lang() for locale handling.
      - Use $request->isBot() which now falls back to device detection if headers are not present.
      
    - Examples:
+     
      - Before: if ($request->threatScore() > 50) { ... }
      - After: // threatScore deprecated — consider alternative logic, e.g.:
        - if (in_array($request->asn(), $blockedAsns())) { ... }
