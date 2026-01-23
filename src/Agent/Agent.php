@@ -184,7 +184,7 @@ class Agent
             AbstractDeviceParser::DEVICE_TYPE_SMART_SPEAKER => 'speaker',
             AbstractDeviceParser::DEVICE_TYPE_WEARABLE => 'wearable',
             AbstractDeviceParser::DEVICE_TYPE_PERIPHERAL => 'peripheral',
-            default => 'unknown ('.$device.')',
+            default => ! empty($device) ? 'unknown ('.$device.')' : 'unknown'
         };
     }
 
