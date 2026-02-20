@@ -6,6 +6,7 @@ namespace PDPhilip\CfRequest;
 
 use Illuminate\Http\Request;
 use PDPhilip\CfRequest\Agent\Agent;
+use PDPhilip\CfRequest\Geo\Countries;
 
 class CfRequest extends Request
 {
@@ -54,37 +55,39 @@ class CfRequest extends Request
 
     public function country(): ?string
     {
-        return $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
+        $code = $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
+
+        return Countries::isValid($code) ? $code : null;
     }
 
     public function city(): ?string
     {
-        return $this->headers->get('X-CITY');
+        return $this->country() ? $this->headers->get('X-CITY') : null;
     }
 
     public function region(): ?string
     {
-        return $this->headers->get('X-REGION');
+        return $this->country() ? $this->headers->get('X-REGION') : null;
     }
 
     public function continent(): ?string
     {
-        return $this->headers->get('X-CONTINENT');
+        return $this->country() ? $this->headers->get('X-CONTINENT') : null;
     }
 
     public function postalCode(): ?string
     {
-        return $this->headers->get('X-POSTAL-CODE');
+        return $this->country() ? $this->headers->get('X-POSTAL-CODE') : null;
     }
 
     public function lat(): ?string
     {
-        return $this->headers->get('X-LAT');
+        return $this->country() ? $this->headers->get('X-LAT') : null;
     }
 
     public function lon(): ?string
     {
-        return $this->headers->get('X-LON');
+        return $this->country() ? $this->headers->get('X-LON') : null;
     }
 
     public function geo(): ?array
@@ -101,7 +104,14 @@ class CfRequest extends Request
 
     public function timezone(): ?string
     {
-        return $this->headers->get('X-TIMEZONE');
+        return $this->country() ? $this->headers->get('X-TIMEZONE') : null;
+    }
+
+    public function isTor(): bool
+    {
+        $code = $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
+
+        return $code === 'T1';
     }
 
     // ----------------------------------------------------------------------

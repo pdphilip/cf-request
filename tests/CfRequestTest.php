@@ -55,51 +55,87 @@ describe('geolocation from X-* headers', function () {
         expect($cf->country())->toBeNull();
     });
 
+    it('returns null for non-country codes like T1 and XX', function () {
+        expect(fakeRequest(['X-COUNTRY' => 'T1'])->country())->toBeNull();
+        expect(fakeRequest(['X-COUNTRY' => 'XX'])->country())->toBeNull();
+        expect(fakeRequest(['CF-IPCountry' => 'T1'])->country())->toBeNull();
+    });
+
+    it('nulls all geo when country is invalid', function () {
+        $cf = fakeRequest([
+            'X-COUNTRY' => 'T1',
+            'X-CITY' => 'Hidden',
+            'X-REGION' => 'Nowhere',
+            'X-CONTINENT' => 'T1',
+            'X-LAT' => '0',
+            'X-LON' => '0',
+            'X-POSTAL-CODE' => '00000',
+            'X-TIMEZONE' => 'Etc/UTC',
+        ]);
+
+        expect($cf->country())->toBeNull();
+        expect($cf->city())->toBeNull();
+        expect($cf->region())->toBeNull();
+        expect($cf->continent())->toBeNull();
+        expect($cf->postalCode())->toBeNull();
+        expect($cf->lat())->toBeNull();
+        expect($cf->lon())->toBeNull();
+        expect($cf->geo())->toBeNull();
+        expect($cf->timezone())->toBeNull();
+    });
+
+    it('detects Tor via isTor()', function () {
+        expect(fakeRequest(['X-COUNTRY' => 'T1'])->isTor())->toBeTrue();
+        expect(fakeRequest(['CF-IPCountry' => 'T1'])->isTor())->toBeTrue();
+        expect(fakeRequest(['X-COUNTRY' => 'US'])->isTor())->toBeFalse();
+        expect(fakeRequest()->isTor())->toBeFalse();
+    });
+
     it('reads city', function () {
-        $cf = fakeRequest(['X-CITY' => 'Berlin']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-CITY' => 'Berlin']);
 
         expect($cf->city())->toBe('Berlin');
     });
 
     it('reads region', function () {
-        $cf = fakeRequest(['X-REGION' => 'Bavaria']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-REGION' => 'Bavaria']);
 
         expect($cf->region())->toBe('Bavaria');
     });
 
     it('reads continent', function () {
-        $cf = fakeRequest(['X-CONTINENT' => 'EU']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-CONTINENT' => 'EU']);
 
         expect($cf->continent())->toBe('EU');
     });
 
     it('reads postal code', function () {
-        $cf = fakeRequest(['X-POSTAL-CODE' => '10115']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-POSTAL-CODE' => '10115']);
 
         expect($cf->postalCode())->toBe('10115');
     });
 
     it('reads lat and lon', function () {
-        $cf = fakeRequest(['X-LAT' => '52.52', 'X-LON' => '13.405']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-LAT' => '52.52', 'X-LON' => '13.405']);
 
         expect($cf->lat())->toBe('52.52');
         expect($cf->lon())->toBe('13.405');
     });
 
     it('returns geo array when both lat and lon present', function () {
-        $cf = fakeRequest(['X-LAT' => '52.52', 'X-LON' => '13.405']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-LAT' => '52.52', 'X-LON' => '13.405']);
 
         expect($cf->geo())->toBe(['lat' => '52.52', 'lon' => '13.405']);
     });
 
     it('returns null geo when lat or lon missing', function () {
-        $cf = fakeRequest(['X-LAT' => '52.52']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-LAT' => '52.52']);
 
         expect($cf->geo())->toBeNull();
     });
 
     it('reads timezone', function () {
-        $cf = fakeRequest(['X-TIMEZONE' => 'Europe/Berlin']);
+        $cf = fakeRequest(['X-COUNTRY' => 'DE', 'X-TIMEZONE' => 'Europe/Berlin']);
 
         expect($cf->timezone())->toBe('Europe/Berlin');
     });
@@ -107,6 +143,7 @@ describe('geolocation from X-* headers', function () {
     it('returns null for all geo when no headers', function () {
         $cf = fakeRequest();
 
+        expect($cf->country())->toBeNull();
         expect($cf->city())->toBeNull();
         expect($cf->region())->toBeNull();
         expect($cf->continent())->toBeNull();
@@ -114,6 +151,7 @@ describe('geolocation from X-* headers', function () {
         expect($cf->lat())->toBeNull();
         expect($cf->lon())->toBeNull();
         expect($cf->timezone())->toBeNull();
+        expect($cf->isTor())->toBeFalse();
     });
 });
 
