@@ -107,6 +107,13 @@ class CfRequest extends Request
         return $this->country() ? $this->headers->get('X-TIMEZONE') : null;
     }
 
+    public function asn(): ?int
+    {
+        $asn = $this->headers->get('X-ASN');
+
+        return $asn !== null ? (int) $asn : null;
+    }
+
     public function isTor(): bool
     {
         $code = $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
@@ -182,6 +189,20 @@ class CfRequest extends Request
         $referer = $this->referer();
 
         return $referer ? (parse_url($referer, PHP_URL_HOST) ?: null) : null;
+    }
+
+    // ----------------------------------------------------------------------
+    // Language
+    // ----------------------------------------------------------------------
+
+    public function language(): ?string
+    {
+        return $this->headers->get('X-LANG') ?? ($this->getPreferredLanguage() ?: null);
+    }
+
+    public function languages(): array
+    {
+        return $this->getLanguages();
     }
 
     // ----------------------------------------------------------------------

@@ -174,6 +174,24 @@ describe('IP resolution priority', function () {
 });
 
 // ----------------------------------------------------------------------
+// ASN
+// ----------------------------------------------------------------------
+
+describe('ASN resolution', function () {
+    it('reads ASN from header', function () {
+        $cf = fakeRequest(['X-ASN' => '13335']);
+
+        expect($cf->asn())->toBe(13335);
+    });
+
+    it('returns null when no ASN header', function () {
+        $cf = fakeRequest();
+
+        expect($cf->asn())->toBeNull();
+    });
+});
+
+// ----------------------------------------------------------------------
 // User Agent Override
 // ----------------------------------------------------------------------
 
@@ -221,6 +239,39 @@ describe('referer parsing', function () {
         $cf = fakeRequest();
 
         expect($cf->refererDomain())->toBeNull();
+    });
+});
+
+// ----------------------------------------------------------------------
+// Language
+// ----------------------------------------------------------------------
+
+describe('language detection', function () {
+    it('prefers X-LANG header over Accept-Language', function () {
+        $cf = fakeRequest([
+            'X-LANG' => 'fr',
+            'Accept-Language' => 'en-US,en;q=0.9',
+        ]);
+
+        expect($cf->language())->toBe('fr');
+    });
+
+    it('falls back to Accept-Language when X-LANG missing', function () {
+        $cf = fakeRequest(['Accept-Language' => 'en-US,en;q=0.9,de;q=0.8']);
+
+        expect($cf->language())->toBe('en_US');
+    });
+
+    it('returns all accepted languages', function () {
+        $cf = fakeRequest(['Accept-Language' => 'en-US,en;q=0.9,de;q=0.8']);
+
+        expect($cf->languages())->toBe(['en_US', 'en', 'de']);
+    });
+
+    it('returns null when no language headers', function () {
+        $cf = fakeRequest();
+
+        expect($cf->language())->toBeNull();
     });
 });
 
