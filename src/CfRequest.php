@@ -1,5 +1,7 @@
 <?php
 
+// Eleganced at 2026-02-20
+
 namespace PDPhilip\CfRequest;
 
 use Illuminate\Http\Request;
@@ -7,16 +9,15 @@ use PDPhilip\CfRequest\Agent\Agent;
 
 class CfRequest extends Request
 {
-    protected $agent;
+    protected ?Agent $agent = null;
 
     protected Request $originalRequest;
 
     public function __construct(?Request $request = null)
     {
         parent::__construct();
-        if (! $request) {
-            $request = app('request');
-        }
+
+        $request ??= app('request');
         $this->originalRequest = $request;
 
         $this->initialize(
@@ -28,6 +29,7 @@ class CfRequest extends Request
             $request->server->all(),
             $request->getContent()
         );
+
         $this->languages = $request->languages;
         $this->charsets = $request->charsets;
         $this->encodings = $request->encodings;
@@ -44,53 +46,67 @@ class CfRequest extends Request
         $this->convertedFiles = $request->convertedFiles;
         $this->userResolver = $request->userResolver;
         $this->routeResolver = $request->routeResolver;
-
     }
+
+    // ----------------------------------------------------------------------
+    // Geolocation
+    // ----------------------------------------------------------------------
 
     public function country(): ?string
     {
-        return $this->getClientCountry();
+        return $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
     }
 
     public function city(): ?string
     {
-        return $this->getClientCity();
+        return $this->headers->get('X-CITY');
     }
 
     public function region(): ?string
     {
-        return $this->getClientRegion();
+        return $this->headers->get('X-REGION');
     }
 
     public function continent(): ?string
     {
-        return $this->getClientContinent();
+        return $this->headers->get('X-CONTINENT');
     }
 
     public function postalCode(): ?string
     {
-        return $this->getClientPostalCode();
+        return $this->headers->get('X-POSTAL-CODE');
     }
 
     public function lat(): ?string
     {
-        return $this->getClientLat();
+        return $this->headers->get('X-LAT');
     }
 
     public function lon(): ?string
     {
-        return $this->getClientLon();
+        return $this->headers->get('X-LON');
     }
 
     public function geo(): ?array
     {
-        return $this->getClientGeo();
+        $lat = $this->lat();
+        $lon = $this->lon();
+
+        if ($lat && $lon) {
+            return ['lat' => $lat, 'lon' => $lon];
+        }
+
+        return null;
     }
 
     public function timezone(): ?string
     {
-        return $this->getClientTimezone();
+        return $this->headers->get('X-TIMEZONE');
     }
+
+    // ----------------------------------------------------------------------
+    // Bot Detection
+    // ----------------------------------------------------------------------
 
     public function isBot(): bool
     {
@@ -104,64 +120,52 @@ class CfRequest extends Request
 
     public function botScore(): ?int
     {
-        return $this->getBotScore();
+        $score = $this->headers->get('X-BOT-SCORE');
+
+        return $score !== null ? (int) $score : null;
     }
 
     public function botScoreData(): array
     {
-        $score = $this->getBotScore();
-        $key = 'no_header';
-        $isBot = null;
-        $value = 'CF header not found';
+        $score = $this->botScore();
+
         if ($score === null) {
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+            return ['score' => null, 'is_bot' => null, 'key' => 'no_header', 'value' => 'CF header not found'];
         }
         if ($score === 0) {
-            $key = 'not_computed';
-            $value = 'CF did not compute a score (Bot score is a pro feature on CF)';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+            return ['score' => 0, 'is_bot' => null, 'key' => 'not_computed', 'value' => 'CF did not compute a score (Bot score is a pro feature on CF)'];
         }
         if ($score === 1) {
-            $key = 'automated';
-            $isBot = true;
-            $value = 'Automated Bot';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
+            return ['score' => 1, 'is_bot' => true, 'key' => 'automated', 'value' => 'Automated Bot'];
         }
-
         if ($score <= 29) {
-            $key = 'likely_automated';
-            $isBot = true;
-            $value = 'Likely Automated Bot (Range 2 to 29)';
-
-            return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-
+            return ['score' => $score, 'is_bot' => true, 'key' => 'likely_automated', 'value' => 'Likely Automated Bot (Range 2 to 29)'];
         }
-        $isBot = false;
-        $key = 'likely_human';
-        $value = 'Likely Human (Range 30 to 99)';
-        if ($score == 99) {
-            $key = 'human';
-            $value = 'Human (Max score)';
+        if ($score === 99) {
+            return ['score' => 99, 'is_bot' => false, 'key' => 'human', 'value' => 'Human (Max score)'];
         }
 
-        return $this->_returnBotData(compact('score', 'isBot', 'key', 'value'));
-
+        return ['score' => $score, 'is_bot' => false, 'key' => 'likely_human', 'value' => 'Likely Human (Range 30 to 99)'];
     }
+
+    // ----------------------------------------------------------------------
+    // Referer
+    // ----------------------------------------------------------------------
 
     public function referer(): ?string
     {
-        return $this->getReferer();
+        return $this->headers->get('X-REFERER') ?? $this->headers->get('Referer');
     }
 
     public function refererDomain(): ?string
     {
-        return $this->getRefererDomain();
+        $referer = $this->referer();
+
+        return $referer ? (parse_url($referer, PHP_URL_HOST) ?: null) : null;
     }
 
     // ----------------------------------------------------------------------
-    // Device and OS
+    // Device
     // ----------------------------------------------------------------------
 
     public function isMobile(): bool
@@ -258,187 +262,38 @@ class CfRequest extends Request
     }
 
     // ----------------------------------------------------------------------
+    // Cloudflare
+    // ----------------------------------------------------------------------
 
     public function detectCloudflare(): bool
     {
-        if ($this->headers->has('CF-ray')) {
-            return true;
-        }
+        return $this->headers->has('CF-ray');
+    }
 
-        return false;
+    public function getHeader(string $key): ?string
+    {
+        return $this->headers->get($key);
     }
 
     // ----------------------------------------------------------------------
-    // Getters
+    // Request Overrides — prioritize CF headers over standard HTTP
     // ----------------------------------------------------------------------
 
-    public function getClientCountry(): ?string
-    {
-        if ($this->headers->has('X-COUNTRY')) {
-            return $this->headers->get('X-COUNTRY');
-        }
-        if ($this->headers->has('CF-IPCountry')) {
-            return $this->headers->get('CF-IPCountry');
-        }
-
-        return null;
-    }
-
-    public function getClientCity(): ?string
-    {
-        if ($this->headers->has('X-CITY')) {
-            return $this->headers->get('X-CITY');
-        }
-
-        return null;
-    }
-
-    public function getClientRegion(): ?string
-    {
-        if ($this->headers->has('X-REGION')) {
-            return $this->headers->get('X-REGION');
-        }
-
-        return null;
-    }
-
-    public function getClientContinent(): ?string
-    {
-        if ($this->headers->has('X-CONTINENT')) {
-            return $this->headers->get('X-CONTINENT');
-        }
-
-        return null;
-    }
-
-    public function getClientPostalCode(): ?string
-    {
-        if ($this->headers->has('X-POSTAL-CODE')) {
-            return $this->headers->get('X-POSTAL-CODE');
-        }
-
-        return null;
-    }
-
-    public function getClientLat(): ?string
-    {
-        if ($this->headers->has('X-LAT')) {
-            return $this->headers->get('X-LAT');
-        }
-
-        return null;
-    }
-
-    public function getClientLon(): ?string
-    {
-        if ($this->headers->has('X-LON')) {
-            return $this->headers->get('X-LON');
-        }
-
-        return null;
-    }
-
-    public function getClientGeo(): ?array
-    {
-        if ($this->getClientLat() && $this->getClientLon()) {
-            return [
-                'lat' => $this->getClientLat(),
-                'lon' => $this->getClientLon(),
-            ];
-        }
-
-        return null;
-    }
-
-    public function getClientTimezone(): ?string
-    {
-        if ($this->headers->has('X-TIMEZONE')) {
-            return $this->headers->get('X-TIMEZONE');
-        }
-
-        return null;
-    }
-
-    public function getBotScore(): ?int
-    {
-        if ($this->headers->has('X-BOT-SCORE')) {
-            return (int) $this->headers->get('X-BOT-SCORE');
-        }
-
-        return null;
-    }
-
-    public function getReferer(): ?string
-    {
-        if ($this->headers->has('X-REFERER')) {
-            return $this->headers->get('X-REFERER');
-        }
-
-        return $this->headers->get('Referer');
-    }
-
-    public function getRefererDomain(): ?string
-    {
-        $referer = $this->getReferer();
-        if ($referer) {
-            $referer = parse_url($referer, PHP_URL_HOST);
-        }
-
-        return $referer;
-    }
-
-    public function getHeader($key): mixed
-    {
-        if ($this->headers->has($key)) {
-            return $this->headers->get($key);
-        }
-
-        return null;
-    }
-
-    protected function getAgent(): Agent
-    {
-        if (! $this->agent) {
-            $this->agent = new Agent($this->userAgent() ?? '');
-        }
-
-        return $this->agent;
-    }
-
-    // ----------------------------------------------------------------------
-    // Getter overrides to prioritize CF headers
-    // ----------------------------------------------------------------------
-
+    /** {@inheritDoc} */
     public function getClientIp(): ?string
     {
-        // Prioritize CF as source of IP
-        if ($this->headers->has('X-IP')) {
-            return $this->headers->get('X-IP');
-        }
-        if ($this->headers->has('CF-Connecting-IP')) {
-            return $this->headers->get('CF-Connecting-IP');
-        }
-        // Else default
-        $ipAddresses = $this->getClientIps();
-
-        return $ipAddresses[0];
+        return $this->headers->get('X-IP')
+            ?? $this->headers->get('CF-Connecting-IP')
+            ?? $this->getClientIps()[0];
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    /** {@inheritDoc} */
     public function userAgent(): ?string
     {
-        if ($this->headers->has('X-AGENT')) {
-            return $this->headers->get('X-AGENT');
-        }
-
-        return $this->headers->get('User-Agent');
+        return $this->headers->get('X-AGENT') ?? $this->headers->get('User-Agent');
     }
 
-    // ----------------------------------------------------------------------
-    // Methods that require the original request for getting trusted values
-    // ----------------------------------------------------------------------
+    // Trusted proxy delegates — must use originalRequest for trusted values
 
     public function getBaseUrl(): string
     {
@@ -471,16 +326,15 @@ class CfRequest extends Request
     }
 
     // ----------------------------------------------------------------------
-    // Protected
+    // Internal
     // ----------------------------------------------------------------------
 
-    private function _returnBotData($payload)
+    protected function getAgent(): Agent
     {
-        return [
-            'score' => $payload['score'],
-            'is_bot' => $payload['isBot'],
-            'key' => $payload['key'],
-            'value' => $payload['value'],
-        ];
+        if (! $this->agent) {
+            $this->agent = new Agent($this->userAgent() ?? '');
+        }
+
+        return $this->agent;
     }
 }
