@@ -128,6 +128,16 @@ class CfRequest extends Request
         return $this->getAgent()->bot();
     }
 
+    public function verifiedBotCategory(): ?string
+    {
+        return $this->headers->get('X-BOT-CAT');
+    }
+
+    public function isVerifiedBot(): bool
+    {
+        return $this->verifiedBotCategory() !== null;
+    }
+
     public function botScore(): ?int
     {
         $score = $this->headers->get('X-BOT-SCORE');

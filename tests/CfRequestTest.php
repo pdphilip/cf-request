@@ -243,6 +243,26 @@ describe('cloudflare detection', function () {
 });
 
 // ----------------------------------------------------------------------
+// Verified Bot Category
+// ----------------------------------------------------------------------
+
+describe('verified bot category', function () {
+    it('reads category from header', function () {
+        $cf = fakeRequest(['X-BOT-CAT' => 'search_engine']);
+
+        expect($cf->verifiedBotCategory())->toBe('search_engine');
+        expect($cf->isVerifiedBot())->toBeTrue();
+    });
+
+    it('returns null when no header', function () {
+        $cf = fakeRequest();
+
+        expect($cf->verifiedBotCategory())->toBeNull();
+        expect($cf->isVerifiedBot())->toBeFalse();
+    });
+});
+
+// ----------------------------------------------------------------------
 // Bot Score
 // ----------------------------------------------------------------------
 
