@@ -6,242 +6,122 @@
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/pdphilip/cf-request.svg?style=flat-square)](https://packagist.org/packages/pdphilip/cf-request)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/pdphilip/cf-request/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/pdphilip/cf-request/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](http://img.shields.io/packagist/dt/pdphilip/cf-request.svg)](https://packagist.org/packages/pdphilip/cf-request)
 
 </div>
 
-Cloudflare Laravel Request inherits the request object from Laravel and parses specific headers from Cloudflare to provide additional information about the request, including:
-
-- `CfRequest::ip()` - Original Client IP (Before it passes through any proxies)
-- `CfRequest::country()` - Origin Country
-- `CfRequest::timezone()` - Origin Timezone
-- `CfRequest::city()` - Origin City
-- `CfRequest::region()` - Origin Region
-- `CfRequest::postalCode()` - Origin Postal Code
-- `CfRequest::lat()` - Origin Latitude
-- `CfRequest::lon()` - Origin Longitude
-- `CfRequest::isBot()` - If it's a bot
-- `CfRequest::asn()` - Autonomous System (AS) number associated with the client IP address
-- `CfRequest::lang()` - Browser's primary accepted language
-
-The User-Agent is also parsed to provide additional information about the device, including:
-
-- `CfRequest::deviceType()` - Device Type (mobile, tablet, desktop, tv, etc)
-- `CfRequest::deviceBrand()` - Device Brand
-- `CfRequest::deviceModel()` - Device Model
-- `CfRequest::os()` - Device OS
-- `CfRequest::osVersion()` - Device OS Version
-- `CfRequest::browser()` - Device Browser
-- `CfRequest::browserVersion()` - Device Browser Version
-
-With this package, you can:
-
-- Replace `Request $request` with `CfRequest $request` in your controller methods to access the additional methods.
-- Call the `CfRequest` facade anywhere in your application to access this information.
-
-[CF Request in action: Test your connection](https://app.snipform.io/cf-request/status)
-
-## Highlights
-
-### Lean into Cloudflare's Security
+A drop-in replacement for Laravel's `Request` that extracts Cloudflare metadata - geolocation, device info, bot detection - from transform rule headers. Use it as a facade or inject it like a normal request.
 
 ```php
 public function register(CfRequest $request)
 {
     if ($request->isBot()) {
-        abort(403, 'Naughty bots');
+        abort(403);
     }
- 
-    $attributes = $request->validate([
-        'first_name' => 'required|string',
-        'last_name' => 'required|string',
-        //... etc
-    ]);
-   //... etc
-}
-```
 
-### Set the timezone based on the origin
-
-```php
-date_default_timezone_set(CfRequest::timezone());
-// Now carbon dates will be parsed for the user's timezone
-```
-
-### Apply logic based on the user's country
-
-```php
-
-public function welcome()
-{
-   if (CfRequest::country() === 'US') {
-         return view('welcome_us');
-   }
-   return view('welcome');
-}
-```
-
-### Apply logic based on device type
-
-```php
-public function welcome()
-{
-    $loadVideo = true;
-    if (CfRequest::deviceType() === 'mobile') {
-        $loadVideo = false;
-    }
-    // etc
+    $country  = $request->country();   // 'US'
+    $timezone = $request->timezone();  // 'America/New_York'
+    $device   = $request->deviceType(); // 'mobile'
+    $browser  = $request->browserName(); // 'Chrome'
 }
 ```
 
 ## Requirements
 
-- Laravel 10+
-- Cloudflare as a proxy (though it will work without it and have no data on the CF-specific headers)
+- PHP 8.2+
+- Laravel 10, 11, or 12
+- Cloudflare as a proxy (works without it, CF-specific methods return null)
 
 ## Installation
 
-Add the package via composer:
-
 ```bash
 composer require pdphilip/cf-request
-```
-
-Then install with:
-
-```bash
 php artisan cf-request:install
 ```
 
 ## Cloudflare Setup
 
-<details>
+The package reads custom headers that Cloudflare injects via transform rules. You need to configure these rules on your Cloudflare zone.
 
-<summary>Option 1: Via Cloudflare API</summary>
+<details>
+<summary>Option 1: Via Cloudflare API (recommended)</summary>
 
 ---
 
-### Step 1: Copy Zone ID
+### Step 1: Get your Zone ID
 
-- Go to your Cloudflare dashboard
-- Click on the domain you want to configure
-- Copy the Zone ID
-- Save in ENV as `CF_API_ZONE_ID`
+- Cloudflare dashboard > select your domain
+- Copy the **Zone ID** from the sidebar
+- Save as `CF_API_ZONE_ID` in your `.env`
 
-<img src="https://cdn.snipform.io/pdphilip/cf-request/zoneId.png" alt="Cloudflare Laravel Request - zoneid" />
+<img src="https://cdn.snipform.io/pdphilip/cf-request/zoneId.png" alt="Zone ID location" />
 
 ### Step 2: Create an API Token
 
-- Navigate to: https://dash.cloudflare.com/profile/api-tokens
-- Click on "Create Token"
-- Select: Create Custom Token (Get started)
+- Go to https://dash.cloudflare.com/profile/api-tokens
+- Create Custom Token with these permissions:
+    - Account > Account Rulesets: **Edit**
+    - Zone > Transform Rules: **Edit**
+    - Account Resources: All Accounts
+    - Zone Resources: All Zones
 
-#### Token Configuration
+<img src="https://cdn.snipform.io/pdphilip/cf-request/token-perms.png" alt="Token permissions" />
 
-- {Enter Token name}
-- Permissions
-    - Account: Account Rulesets: Edit
-    - Zone: Transform Rules: Edit
-- Account Resources
-    - Include: All Accounts
-- Zone Resources
-    - Include: All Zones
+- Save the token as `CF_API_TOKEN` in your `.env`
 
-<img src="https://cdn.snipform.io/pdphilip/cf-request/token-perms.png" alt="Cloudflare Laravel Request - token perms" />
-
-- Create Token and Save in ENV as `CF_API_TOKEN`
-
-## Run the artisan command:
+### Step 3: Run the command
 
 ```bash
 php artisan cf-request:headers
 ```
 
-<img src="https://cdn.snipform.io/pdphilip/cf-request/cf-request-headers.gif" alt="Cloudflare Laravel Request - artisan" />
+This creates a "Laravel Headers" transform rule on your zone with all required headers.
+
+### Step 4: Verify
+
+```bash
+php artisan cf-request:status
+```
+
+Shows a grouped table of every expected header and whether it's configured on Cloudflare.
 
 ---
 
 </details>
 
-
 <details>
-
-<summary>Option 2: Manually on Cloudflare</summary>
+<summary>Option 2: Manual setup on Cloudflare dashboard</summary>
 
 ---
 
-### Navigate to "Modify Request Header"
+### Navigate to Transform Rules
 
-- Go to your Cloudflare dashboard
-- Click on the domain you want to configure
-- Click on Menu "Rules" -> "Overview"
-- Click on "+ Create Rule" -> select "Request Header Transform Rule"
+- Cloudflare dashboard > select your domain
+- Rules > Transform Rules > Modify Request Header
+- Create a Rule
 
-### Creating the rule
+### Rule configuration
 
-- Name: "Laravel Headers:
-- Select "All incoming requests"
-- Set the following headers:
+- **Name:** Laravel Headers
+- **When:** All incoming requests
+- **Then:** Set the following headers:
 
-> Set dynamic    
-> X-AGENT    
-> http.user_agent
-
-> Set dynamic    
-> X-IP    
-> ip.src
-
-> Set dynamic    
-> X-COUNTRY    
-> ip.src.country
-
-> Set dynamic    
-> X-CONTINENT    
-> ip.src.continent
-
-> Set dynamic    
-> X-CITY    
-> ip.src.city
-
-> Set dynamic    
-> X-POSTAL-CODE    
-> ip.src.postal_code
-
-> Set dynamic    
-> X-REGION    
-> ip.src.region
-
-> Set dynamic    
-> X-TIMEZONE    
-> ip.src.timezone.name
-
-> Set dynamic    
-> X-LAT    
-> ip.src.lat
-
-> Set dynamic    
-> X-LON    
-> ip.src.lon
-
-> Set dynamic    
-> X-REFERER    
-> http.referer
-
-
-> Set dynamic    
-> X-ASN    
-> ip.src.asnum    
-
-
-> Set dynamic    
-> X-LANG    
-> http.request.accepted_languages[0]    
-
-> Set dynamic    
-> X-IS-BOT    
-> cf.client.bot
-
+| Type | Header | Expression |
+|------|--------|------------|
+| Set dynamic | `X-IP` | `ip.src` |
+| Set dynamic | `X-ASN` | `ip.src.asnum` |
+| Set dynamic | `X-AGENT` | `http.user_agent` |
+| Set dynamic | `X-COUNTRY` | `ip.src.country` |
+| Set dynamic | `X-CITY` | `ip.src.city` |
+| Set dynamic | `X-REGION` | `ip.src.region` |
+| Set dynamic | `X-CONTINENT` | `ip.src.continent` |
+| Set dynamic | `X-POSTAL-CODE` | `ip.src.postal_code` |
+| Set dynamic | `X-LAT` | `ip.src.lat` |
+| Set dynamic | `X-LON` | `ip.src.lon` |
+| Set dynamic | `X-TIMEZONE` | `ip.src.timezone.name` |
+| Set dynamic | `X-REFERER` | `http.referer` |
+| Set dynamic | `X-LANG` | `http.request.accepted_languages[0]` |
+| Set dynamic | `X-BOT-CAT` | `cf.verified_bot_category` |
 
 ---
 
@@ -249,75 +129,113 @@ php artisan cf-request:headers
 
 ## Usage
 
-All the standard Laravel request methods are available, with the following additional methods:
+Use the `CfRequest` facade or inject `CfRequest $request` in place of Laravel's `Request`.
 
-### `CfRequest::country()`
+### Geolocation
 
-### `CfRequest::city()`
+```php
+$request->country();    // 'AU' (ISO 3166-1 Alpha-2, validated)
+$request->city();       // 'Sydney'
+$request->region();     // 'New South Wales'
+$request->continent();  // 'OC'
+$request->postalCode(); // '2000'
+$request->lat();        // '-33.8688'
+$request->lon();        // '151.2093'
+$request->geo();        // ['lat' => '-33.8688', 'lon' => '151.2093'] or null
+$request->timezone();   // 'Australia/Sydney'
+$request->isTor();      // true if traffic is from the Tor network
+```
 
-### `CfRequest::region()`
+Country codes are validated against the ISO 3166-1 standard. Non-country values like `T1` (Tor) and `XX` (unknown) return `null` from `country()`, which also nulls all dependent geo fields. Use `isTor()` to detect Tor traffic specifically.
 
-### `CfRequest::postalCode()`
+### Bot Detection
 
-### `CfRequest::lat()`
+```php
+$request->isBot();      // true/false (CrawlerDetect + DeviceDetector)
+$request->bot();        // 'Googlebot' or 'no_user_agent' or false
 
-### `CfRequest::lon()`
+// CF verified bot category (all plans)
+$request->verifiedBotCategory(); // 'search_engine', 'advertising', etc.
+$request->isVerifiedBot();       // true/false
 
-### `CfRequest::timezone()`
+// CF bot score (Enterprise only)
+$request->botScore();     // 0-99 integer or null
+$request->botScoreData(); // ['score' => 99, 'is_bot' => false, 'key' => 'human', 'value' => '...']
+```
 
-### `CfRequest::isBot()`
+Bot detection works without Cloudflare. The package uses [CrawlerDetect](https://github.com/JayBizzle/Crawler-Detect) (1,400+ bot patterns) as the primary check, with [DeviceDetector](https://github.com/matomo-org/device-detector) as a fallback. Requests with no User-Agent are flagged as bots.
 
-### `CfRequest::isMobile()`
+### Device
 
-### `CfRequest::isTablet()`
+```php
+$request->deviceType();  // 'desktop', 'mobile', 'tablet', 'tv'
+$request->isMobile();    // true/false
+$request->isTablet();    // true/false
+$request->isDesktop();   // true/false
+$request->isTv();        // true/false
+$request->deviceBrand(); // 'Apple'
+$request->deviceModel(); // 'iPhone'
+```
 
-### `CfRequest::isDesktop()`
+### Browser
 
-### `CfRequest::isTv()`
+```php
+$request->browser();        // 'Chrome 120.0'
+$request->browserName();    // 'Chrome'
+$request->browserVersion(); // '120.0'
+$request->browserFamily();  // 'Chrome'
+$request->browserData();    // full parsed array
+```
 
-### `CfRequest::deviceType()`
+### OS
 
-### `CfRequest::deviceBrand()`
+```php
+$request->os();        // 'Mac 10.15'
+$request->osName();    // 'Mac'
+$request->osVersion(); // '10.15'
+$request->osFamily();  // 'Mac'
+$request->osData();    // full parsed array
+```
 
-### `CfRequest::deviceModel()`
+### Language
 
-### `CfRequest::os()`
+```php
+$request->language();  // 'en_US' (from X-LANG header, falls back to Accept-Language)
+$request->languages(); // ['en_US', 'en', 'de'] (from Accept-Language)
+```
 
-### `CfRequest::osVersion()`
+### Request Overrides
 
-### `CfRequest::osFamily()`
+```php
+$request->getClientIp(); // prioritizes X-IP > CF-Connecting-IP > standard
+$request->asn();         // 13335 (Autonomous System Number)
+$request->userAgent();   // prioritizes X-AGENT > User-Agent
+$request->referer();     // prioritizes X-REFERER > Referer
+$request->refererDomain(); // 'google.com' (parsed from referer)
+```
 
-### `CfRequest::browser()`
+### Cloudflare
 
-### `CfRequest::browserVersion()`
+```php
+$request->detectCloudflare(); // true if CF-ray header is present
+$request->getHeader('X-CUSTOM'); // read any header
+```
 
-### `CfRequest::browserName()`
+## Artisan Commands
 
-### `CfRequest::browserFamily()`
+| Command | Description |
+|---------|-------------|
+| `cf-request:install` | Publish config and register service provider |
+| `cf-request:headers` | Create transform rule headers on Cloudflare via the API |
+| `cf-request:status` | Check which headers are configured on Cloudflare |
 
-### `CfRequest::referer()`
+## Debug Route
 
-### `CfRequest::refererDomain()`
-
-### `CfRequest::asn()`
-
-### `CfRequest::lang()`
-
-You can use the `CfRequest` facade or inject the `CfRequest $request` class into your controller methods.
-
-## Testing headers
-
-- This package comes with a test route that will display the headers being parsed from Cloudflare.
-- You can access this route by visiting `/cf-request/status` on your application.
-- You can disable this in the config file or by setting the `CF_ALLOW_STATUS_VIEW` environment variable to `false`.
+Visit `/cf-request/status` in your browser to see all parsed headers as JSON. Disable with `CF_ALLOW_STATUS_VIEW=false` in your `.env`.
 
 ## Changelog
 
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Contributing
-
-Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
+See [CHANGELOG](CHANGELOG.md) for recent changes.
 
 ## Credits
 
@@ -325,4 +243,4 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) for details.
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). See [License File](LICENSE.md) for details.

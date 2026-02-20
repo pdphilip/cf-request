@@ -4,47 +4,28 @@ namespace PDPhilip\CfRequest\Cloudflare;
 
 class Cloudflare
 {
-    public static function checkCfHeaders(): bool
-    {
-        $cf = new TransformRules;
-
-        return $cf->verifyHeaders();
-    }
-
     public static function setCfHeaders(): array
     {
-        $cf = new TransformRules;
-        $res = $cf->setLaravelHeaders();
-
-        return [
-            'success' => $res->isSuccessFul(),
-            'code' => $res->code,
-            'message' => $res->message,
-        ];
+        return (new TransformRules)->setLaravelHeaders();
     }
 
-    public static function deleteRuleset($id): bool
+    public static function checkCfHeaders(): bool
     {
-        $cf = new TransformRules;
-        $res = $cf->deleteRuleSet($id);
-
-        return true;
-    }
-
-    public static function getRulesetId(): ?string
-    {
-        $cf = new TransformRules;
-
-        return $cf->getRulesetId();
+        return (new TransformRules)->findLaravelRule() !== null;
     }
 
     public static function getCfHeaders(): array
     {
-        $cf = new TransformRules;
-        // look up
-        $res = $cf->getResponseHeadersRuleset();
+        return (new TransformRules)->getResponseHeadersRuleset()->asArray();
+    }
 
-        return $res->asArray();
+    public static function deleteRuleset(string $id): bool
+    {
+        return (new TransformRules)->deleteRuleSet($id)->isSuccessFul();
+    }
 
+    public static function getRulesetId(): ?string
+    {
+        return (new TransformRules)->getRulesetId();
     }
 }

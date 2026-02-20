@@ -1,22 +1,24 @@
 <?php
 
+// Eleganced at 2026-02-20
+
 namespace PDPhilip\CfRequest;
 
 use Illuminate\Http\Request;
 use PDPhilip\CfRequest\Agent\Agent;
+use PDPhilip\CfRequest\Geo\Countries;
 
 class CfRequest extends Request
 {
-    protected $agent;
+    protected ?Agent $agent = null;
 
     protected Request $originalRequest;
 
     public function __construct(?Request $request = null)
     {
         parent::__construct();
-        if (! $request) {
-            $request = app('request');
-        }
+
+        $request ??= app('request');
         $this->originalRequest = $request;
 
         $this->initialize(
@@ -28,6 +30,7 @@ class CfRequest extends Request
             $request->server->all(),
             $request->getContent()
         );
+
         $this->languages = $request->languages;
         $this->charsets = $request->charsets;
         $this->encodings = $request->encodings;
@@ -44,391 +47,294 @@ class CfRequest extends Request
         $this->convertedFiles = $request->convertedFiles;
         $this->userResolver = $request->userResolver;
         $this->routeResolver = $request->routeResolver;
-
     }
+
+    // ----------------------------------------------------------------------
+    // Geolocation
+    // ----------------------------------------------------------------------
 
     public function country(): ?string
     {
-        return $this->getClientCountry();
+        $code = $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
+
+        return Countries::isValid($code) ? $code : null;
     }
 
     public function city(): ?string
     {
-        return $this->getClientCity();
+        return $this->country() ? $this->headers->get('X-CITY') : null;
     }
 
     public function region(): ?string
     {
-        return $this->getClientRegion();
+        return $this->country() ? $this->headers->get('X-REGION') : null;
     }
 
     public function continent(): ?string
     {
-        return $this->getClientContinent();
+        return $this->country() ? $this->headers->get('X-CONTINENT') : null;
     }
 
     public function postalCode(): ?string
     {
-        return $this->getClientPostalCode();
+        return $this->country() ? $this->headers->get('X-POSTAL-CODE') : null;
     }
 
     public function lat(): ?string
     {
-        return $this->getClientLat();
+        return $this->country() ? $this->headers->get('X-LAT') : null;
     }
 
     public function lon(): ?string
     {
-        return $this->getClientLon();
+        return $this->country() ? $this->headers->get('X-LON') : null;
     }
 
     public function geo(): ?array
     {
-        return $this->getClientGeo();
+        $lat = $this->lat();
+        $lon = $this->lon();
+
+        if ($lat && $lon) {
+            return ['lat' => $lat, 'lon' => $lon];
+        }
+
+        return null;
     }
 
     public function timezone(): ?string
     {
-        return $this->getClientTimezone();
+        return $this->country() ? $this->headers->get('X-TIMEZONE') : null;
     }
 
-    public function isBot(): ?bool
+    public function asn(): ?int
     {
-        return $this->getIsBot();
+        $asn = $this->headers->get('X-ASN');
+
+        return $asn !== null ? (int) $asn : null;
     }
 
-    public function asn(): ?string
+    public function isTor(): bool
     {
-        return $this->getAsn();
+        $code = $this->headers->get('X-COUNTRY') ?? $this->headers->get('CF-IPCountry');
+
+        return $code === 'T1';
     }
 
-    public function lang(): ?string
+    // ----------------------------------------------------------------------
+    // Bot Detection
+    // ----------------------------------------------------------------------
+
+    public function isBot(): bool
     {
-        return $this->getLang();
+        return $this->getAgent()->isBot();
     }
+
+    public function bot(): string|false
+    {
+        return $this->getAgent()->bot();
+    }
+
+    public function verifiedBotCategory(): ?string
+    {
+        return $this->headers->get('X-BOT-CAT');
+    }
+
+    public function isVerifiedBot(): bool
+    {
+        return $this->verifiedBotCategory() !== null;
+    }
+
+    public function botScore(): ?int
+    {
+        $score = $this->headers->get('X-BOT-SCORE');
+
+        return $score !== null ? (int) $score : null;
+    }
+
+    public function botScoreData(): array
+    {
+        $score = $this->botScore();
+
+        if ($score === null) {
+            return ['score' => null, 'is_bot' => null, 'key' => 'no_header', 'value' => 'CF header not found'];
+        }
+        if ($score === 0) {
+            return ['score' => 0, 'is_bot' => null, 'key' => 'not_computed', 'value' => 'CF did not compute a score (Bot score is a pro feature on CF)'];
+        }
+        if ($score === 1) {
+            return ['score' => 1, 'is_bot' => true, 'key' => 'automated', 'value' => 'Automated Bot'];
+        }
+        if ($score <= 29) {
+            return ['score' => $score, 'is_bot' => true, 'key' => 'likely_automated', 'value' => 'Likely Automated Bot (Range 2 to 29)'];
+        }
+        if ($score === 99) {
+            return ['score' => 99, 'is_bot' => false, 'key' => 'human', 'value' => 'Human (Max score)'];
+        }
+
+        return ['score' => $score, 'is_bot' => false, 'key' => 'likely_human', 'value' => 'Likely Human (Range 30 to 99)'];
+    }
+
+    // ----------------------------------------------------------------------
+    // Referer
+    // ----------------------------------------------------------------------
 
     public function referer(): ?string
     {
-        return $this->getReferer();
+        return $this->headers->get('X-REFERER') ?? $this->headers->get('Referer');
     }
 
     public function refererDomain(): ?string
     {
-        return $this->getRefererDomain();
-    }
+        $referer = $this->referer();
 
-    /**
-     * @deprecated - Cloudflare no longer has this feature. Here for backwards compatibility
-     */
-    public function threatScore(): int
-    {
-        return 0;
+        return $referer ? (parse_url($referer, PHP_URL_HOST) ?: null) : null;
     }
 
     // ----------------------------------------------------------------------
-    // Device and OS
+    // Language
     // ----------------------------------------------------------------------
 
-    public function isMobile(): ?bool
+    public function language(): ?string
     {
-        return $this->getAgent()?->isMobile();
+        return $this->headers->get('X-LANG') ?? ($this->getPreferredLanguage() ?: null);
     }
 
-    public function isTablet(): ?bool
+    public function languages(): array
     {
-        return $this->getAgent()?->isTablet();
+        return $this->getLanguages();
     }
 
-    public function isDesktop(): ?bool
+    // ----------------------------------------------------------------------
+    // Device
+    // ----------------------------------------------------------------------
+
+    public function isMobile(): bool
     {
-        return $this->getAgent()?->isDesktop();
+        return $this->getAgent()->isMobile();
     }
 
-    public function isTv(): ?bool
+    public function isTablet(): bool
     {
-        return $this->getAgent()?->isTv();
+        return $this->getAgent()->isTablet();
     }
 
-    public function deviceType(): ?string
+    public function isDesktop(): bool
     {
-        return $this->getAgent()?->deviceType();
+        return $this->getAgent()->isDesktop();
     }
 
-    public function deviceBrand(): ?string
+    public function isTv(): bool
     {
-        return $this->getAgent()?->deviceBrand();
+        return $this->getAgent()->isTv();
     }
 
-    public function deviceModel(): ?string
+    public function deviceType(): string
     {
-        return $this->getAgent()?->deviceModel();
+        return $this->getAgent()->deviceType();
+    }
+
+    public function deviceBrand(): string
+    {
+        return $this->getAgent()->deviceBrand();
+    }
+
+    public function deviceModel(): string
+    {
+        return $this->getAgent()->deviceModel();
     }
 
     // ----------------------------------------------------------------------
     // OS
     // ----------------------------------------------------------------------
 
-    public function os(): ?string
+    public function os(): string
     {
-        return $this->getAgent()?->os();
+        return $this->getAgent()->os();
     }
 
-    public function osName(): ?string
+    public function osName(): string
     {
-        return $this->getAgent()?->osName();
+        return $this->getAgent()->osName();
     }
 
-    public function osVersion(): ?string
+    public function osVersion(): string
     {
-        return $this->getAgent()?->osVersion();
+        return $this->getAgent()->osVersion();
     }
 
-    public function osFamily(): ?string
+    public function osFamily(): string
     {
-        return $this->getAgent()?->osFamily();
+        return $this->getAgent()->osFamily();
     }
 
-    public function osData(): ?array
+    public function osData(): array
     {
-        return $this->getAgent()?->osData();
+        return $this->getAgent()->osData();
     }
 
     // ----------------------------------------------------------------------
     // Browser
     // ----------------------------------------------------------------------
 
-    public function browser(): ?string
+    public function browser(): string
     {
-        return $this->getAgent()?->browser();
+        return $this->getAgent()->browser();
     }
 
-    public function browserName(): ?string
+    public function browserName(): string
     {
-        return $this->getAgent()?->browserName();
+        return $this->getAgent()->browserName();
     }
 
-    public function browserVersion(): ?string
+    public function browserVersion(): string
     {
-        return $this->getAgent()?->browserVersion();
+        return $this->getAgent()->browserVersion();
     }
 
-    public function browserFamily(): ?string
+    public function browserFamily(): string
     {
-        return $this->getAgent()?->browserFamily();
+        return $this->getAgent()->browserFamily();
     }
 
-    public function browserData(): ?array
+    public function browserData(): array
     {
-        return $this->getAgent()?->browserData();
+        return $this->getAgent()->browserData();
     }
 
+    // ----------------------------------------------------------------------
+    // Cloudflare
     // ----------------------------------------------------------------------
 
     public function detectCloudflare(): bool
     {
-        if ($this->headers->has('CF-ray')) {
-            return true;
-        }
+        return $this->headers->has('CF-ray');
+    }
 
-        return false;
+    public function getHeader(string $key): ?string
+    {
+        return $this->headers->get($key);
     }
 
     // ----------------------------------------------------------------------
-    // Getters
+    // Request Overrides — prioritize CF headers over standard HTTP
     // ----------------------------------------------------------------------
 
-    public function getClientCountry(): ?string
-    {
-        if ($this->headers->has('X-COUNTRY')) {
-            return $this->headers->get('X-COUNTRY');
-        }
-        if ($this->headers->has('CF-IPCountry')) {
-            return $this->headers->get('CF-IPCountry');
-        }
-
-        return null;
-    }
-
-    public function getClientCity(): ?string
-    {
-        if ($this->headers->has('X-CITY')) {
-            return $this->headers->get('X-CITY');
-        }
-
-        return null;
-    }
-
-    public function getClientRegion(): ?string
-    {
-        if ($this->headers->has('X-REGION')) {
-            return $this->headers->get('X-REGION');
-        }
-
-        return null;
-    }
-
-    public function getClientContinent(): ?string
-    {
-        if ($this->headers->has('X-CONTINENT')) {
-            return $this->headers->get('X-CONTINENT');
-        }
-
-        return null;
-    }
-
-    public function getClientPostalCode(): ?string
-    {
-        if ($this->headers->has('X-POSTAL-CODE')) {
-            return $this->headers->get('X-POSTAL-CODE');
-        }
-
-        return null;
-    }
-
-    public function getClientLat(): ?string
-    {
-        if ($this->headers->has('X-LAT')) {
-            return $this->headers->get('X-LAT');
-        }
-
-        return null;
-    }
-
-    public function getClientLon(): ?string
-    {
-        if ($this->headers->has('X-LON')) {
-            return $this->headers->get('X-LON');
-        }
-
-        return null;
-    }
-
-    public function getClientGeo(): ?array
-    {
-        if ($this->getClientLat() && $this->getClientLon()) {
-            return [
-                'lat' => $this->getClientLat(),
-                'lon' => $this->getClientLon(),
-            ];
-        }
-
-        return null;
-    }
-
-    public function getClientTimezone(): ?string
-    {
-        if ($this->headers->has('X-TIMEZONE')) {
-            return $this->headers->get('X-TIMEZONE');
-        }
-
-        return null;
-    }
-
-    public function getIsBot(): ?bool
-    {
-        if ($this->headers->has('X-IS-BOT')) {
-            if ($this->headers->get('X-IS-BOT') === 'false') {
-                return $this->getAgent()?->isBot();
-            }
-
-            return true;
-        }
-
-        return $this->getAgent()?->isBot();
-    }
-
-    public function getASN(): ?string
-    {
-        if ($this->headers->has('X-ASN')) {
-            return (string) $this->headers->get('X-ASN');
-        }
-
-        return null;
-    }
-
-    public function getLang(): ?string
-    {
-        if ($this->headers->has('X-LANG') && $this->headers->get('X-LANG')) {
-            return (string) $this->headers->get('X-LANG');
-        }
-
-        return null;
-    }
-
-    public function getReferer(): ?string
-    {
-        if ($this->headers->has('X-REFERER')) {
-            return $this->headers->get('X-REFERER');
-        }
-
-        return $this->headers->get('Referer');
-    }
-
-    public function getRefererDomain(): ?string
-    {
-        $referer = $this->getReferer();
-        if ($referer) {
-            $referer = parse_url($referer, PHP_URL_HOST);
-        }
-
-        return $referer;
-    }
-
-    public function getHeader($key): mixed
-    {
-        if ($this->headers->has($key)) {
-            return $this->headers->get($key);
-        }
-
-        return null;
-    }
-
-    protected function getAgent()
-    {
-        if (! $this->userAgent()) {
-            return null;
-        }
-        if (! $this->agent) {
-            $this->agent = new Agent($this->userAgent());
-        }
-
-        return $this->agent;
-    }
-
-    // ----------------------------------------------------------------------
-    // Getter overrides to prioritize CF headers
-    // ----------------------------------------------------------------------
-
+    /** {@inheritDoc} */
     public function getClientIp(): ?string
     {
-        // Prioritize CF as source of IP
-        if ($this->headers->has('X-IP')) {
-            return $this->headers->get('X-IP');
-        }
-        if ($this->headers->has('CF-Connecting-IP')) {
-            return $this->headers->get('CF-Connecting-IP');
-        }
-        // Else default
-        $ipAddresses = $this->getClientIps();
-
-        return $ipAddresses[0];
+        return $this->headers->get('X-IP')
+            ?? $this->headers->get('CF-Connecting-IP')
+            ?? $this->getClientIps()[0];
     }
 
-    /**
-     * @inerhitDoc
-     */
+    /** {@inheritDoc} */
     public function userAgent(): ?string
     {
-        if ($this->headers->has('X-AGENT')) {
-            return $this->headers->get('X-AGENT');
-        }
-
-        return $this->headers->get('User-Agent');
+        return $this->headers->get('X-AGENT') ?? $this->headers->get('User-Agent');
     }
 
-    // ----------------------------------------------------------------------
-    // Methods that require the original request for getting trusted values
-    // ----------------------------------------------------------------------
+    // Trusted proxy delegates — must use originalRequest for trusted values
 
     public function getBaseUrl(): string
     {
@@ -458,5 +364,18 @@ class CfRequest extends Request
     public function isFromTrustedProxy(): bool
     {
         return $this->originalRequest->isFromTrustedProxy();
+    }
+
+    // ----------------------------------------------------------------------
+    // Internal
+    // ----------------------------------------------------------------------
+
+    protected function getAgent(): Agent
+    {
+        if (! $this->agent) {
+            $this->agent = new Agent($this->userAgent() ?? '');
+        }
+
+        return $this->agent;
     }
 }

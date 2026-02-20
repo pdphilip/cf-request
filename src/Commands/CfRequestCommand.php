@@ -1,94 +1,100 @@
 <?php
 
+// Eleganced at 2026-02-20
+
 namespace PDPhilip\CfRequest\Commands;
 
 use Illuminate\Console\Command;
-use PDPhilip\CfRequest\Cloudflare\Cloudflare;
-
-use function OmniTerm\asyncFunction;
-use function OmniTerm\render;
+use OmniTerm\HasOmniTerm;
+use PDPhilip\CfRequest\Cloudflare\TransformRules;
 
 class CfRequestCommand extends Command
 {
+    use HasOmniTerm;
+
     public $signature = 'cf-request:headers';
 
-    public $description = 'Uses the Cloudflare API to set the required headers';
+    public $description = 'Create or update Cloudflare transform rule headers';
 
     public function handle(): int
     {
+        $this->omni->newLine();
+        $this->omni->titleBar('CF-Request Headers', 'amber');
+        $this->omni->newLine();
 
-        $hasToken = config('cf-request.cloudflare.token');
-
-        if (! $hasToken) {
-
-            render(view('omniterm::status.custom', [
-                'status' => 'error',
-                'name' => 'Config Error',
-                'title' => 'Cloudflare token not found',
-                'help' => [
-                    'Please set the \'token\' value in the config file, or the CF_API_TOKEN environment variable',
-                ],
-            ]));
-
+        if (! $this->hasRequiredConfig()) {
             return self::FAILURE;
         }
 
-        $hasZoneId = config('cf-request.cloudflare.zoneId');
+        $this->showHeadersPreview();
 
-        if (! $hasZoneId) {
-
-            render(view('omniterm::status.custom', [
-                'status' => 'error',
-                'name' => 'Config Error',
-                'title' => 'Cloudflare ZoneId not found',
-                'help' => [
-                    'Please set the \'zoneId\' value in the config file, or the CF_API_ZONE_ID environment variable',
-                ],
-            ]));
-
-            return self::FAILURE;
-        }
-
-        $async = asyncFunction(function () {
+        $result = $this->omni->task('Configuring Cloudflare transform rules', function () {
             try {
-                $res = Cloudflare::setCfHeaders();
+                $response = (new TransformRules)->setLaravelHeaders();
+
+                return [
+                    'state' => ($response['success'] ?? false) ? 'success' : 'error',
+                    'message' => $response['message'] ?? 'Unknown error',
+                    'data' => $response,
+                ];
             } catch (\Exception $e) {
-                return ['success' => false, 'message' => $e->getMessage()];
+                return ['state' => 'error', 'message' => $e->getMessage()];
             }
-
-            return $res;
-
-        });
-        $async->withFailOver(view('omniterm::loaders.spinner', [
-            'state' => 'failover',
-            'message' => 'Setting Cloudflare Headers',
-            'i' => 0,
-        ]));
-        $result = $async->run(function () use ($async) {
-            $async->render(view('omniterm::loaders.spinner', [
-                'colors' => ['text-amber-500', 'text-emerald-500', 'text-rose-500', 'text-sky-500'],
-                'state' => 'running',
-                'message' => 'Setting Cloudflare Headers',
-                'i' => $async->getInterval(),
-            ]));
         });
 
-        if ($result['success']) {
-            $async->render(view('omniterm::loaders.spinner', [
-                'state' => 'success',
-                'message' => 'Cloudflare Headers Set',
-                'details' => $result['message'],
-                'i' => $async->getInterval(),
-            ]));
-        } else {
-            $async->render(view('omniterm::loaders.spinner', [
-                'state' => 'error',
-                'message' => 'Error',
-                'details' => $result['message'],
-                'i' => $async->getInterval(),
-            ]));
+        if (! $result || ! ($result->data['success'] ?? false)) {
+            $this->omni->newLine();
+            $this->omni->statusError('Failed', $result->data['message'] ?? $result->message ?? 'Unknown error');
+
+            return self::FAILURE;
         }
+
+        $action = $result->data['action'] === 'created' ? 'Created' : 'Updated';
+        $count = count(TransformRules::allHeaders());
+
+        $this->omni->newLine();
+        $this->omni->statusSuccess(
+            "Transform Rule {$action}",
+            "{$count} headers configured on Cloudflare",
+            ['Run: php artisan cf-request:status to verify'],
+        );
 
         return self::SUCCESS;
+    }
+
+    // ----------------------------------------------------------------------
+    // Internal
+    // ----------------------------------------------------------------------
+
+    private function hasRequiredConfig(): bool
+    {
+        if (! config('cf-request.cloudflare.token')) {
+            $this->omni->statusError('Config Error', 'Cloudflare API token not found', ['Set CF_API_TOKEN in your .env file']);
+
+            return false;
+        }
+
+        if (! config('cf-request.cloudflare.zoneId')) {
+            $this->omni->statusError('Config Error', 'Cloudflare Zone ID not found', ['Set CF_API_ZONE_ID in your .env file']);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function showHeadersPreview(): void
+    {
+        $count = count(TransformRules::allHeaders());
+        $this->omni->divider("Headers ({$count})");
+        $this->omni->tableHeader('Header', 'Value', 'Expression');
+
+        foreach (TransformRules::HEADER_GROUPS as $headers) {
+            foreach ($headers as $name => $expression) {
+                $this->omni->tableRow($name, $expression);
+            }
+        }
+
+        $this->omni->newLine();
     }
 }

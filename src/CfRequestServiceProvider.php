@@ -4,6 +4,7 @@ namespace PDPhilip\CfRequest;
 
 use Illuminate\Support\Facades\Route;
 use PDPhilip\CfRequest\Commands\CfRequestCommand;
+use PDPhilip\CfRequest\Commands\CfRequestStatusCommand;
 use PDPhilip\CfRequest\Http\Controllers\CloudflareStatusController;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -17,6 +18,7 @@ class CfRequestServiceProvider extends PackageServiceProvider
             ->name('cf-request')
             ->hasConfigFile()
             ->hasCommand(CfRequestCommand::class)
+            ->hasCommand(CfRequestStatusCommand::class)
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->setName('cf-request:install')
