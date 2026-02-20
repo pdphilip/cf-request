@@ -10,3 +10,5 @@ testbench.yaml
 vendor
 node_modules
 _BACK/*
+
+.CF_REQUEST*
