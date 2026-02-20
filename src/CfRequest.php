@@ -428,7 +428,7 @@ class CfRequest extends Request
     }
 
     /**
-     * @inerhitDoc
+     * {@inheritDoc}
      */
     public function userAgent(): ?string
     {

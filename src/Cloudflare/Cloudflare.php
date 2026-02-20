@@ -28,7 +28,7 @@ class Cloudflare
         $cf = new TransformRules;
         $res = $cf->deleteRuleSet($id);
 
-        return true;
+        return $res->isSuccessFul();
     }
 
     public static function getRulesetId(): ?string
