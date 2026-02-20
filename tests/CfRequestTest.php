@@ -335,26 +335,47 @@ describe('device detection via user agent', function () {
         expect($cf->osData())->toBeArray();
     });
 
-    it('detects bot from user agent', function () {
+    it('detects bot and returns name', function () {
         $cf = fakeRequest([
             'User-Agent' => 'Googlebot/2.1 (+http://www.google.com/bot.html)',
         ]);
 
         expect($cf->isBot())->toBeTrue();
+        expect($cf->bot())->toBeString();
+        expect($cf->bot())->toContain('Googlebot');
     });
 
-    it('returns null for all device methods when no user agent', function () {
+    it('detects common crawlers via CrawlerDetect', function () {
+        $crawlers = [
+            'Baiduspider+(+http://www.baidu.com/search/spider.htm)',
+            'Mozilla/5.0 (compatible; Bingbot/2.0; +http://www.bing.com/bingbot.htm)',
+            'DuckDuckBot/1.0; (+http://duckduckgo.com/duckduckbot.html)',
+            'facebookexternalhit/1.1',
+            'Twitterbot/1.0',
+            'Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)',
+        ];
+
+        foreach ($crawlers as $crawler) {
+            $cf = fakeRequest(['User-Agent' => $crawler]);
+            expect($cf->isBot())->toBeTrue("Failed for: {$crawler}");
+            expect($cf->bot())->toBeString("No name for: {$crawler}");
+        }
+    });
+
+    it('returns false bot name for real browsers', function () {
+        $cf = fakeRequest([
+            'User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        ]);
+
+        expect($cf->isBot())->toBeFalse();
+        expect($cf->bot())->toBeFalse();
+    });
+
+    it('flags missing user agent as bot', function () {
         $cf = fakeRequest();
 
-        expect($cf->isMobile())->toBeNull();
-        expect($cf->isDesktop())->toBeNull();
-        expect($cf->isTablet())->toBeNull();
-        expect($cf->deviceType())->toBeNull();
-        expect($cf->deviceBrand())->toBeNull();
-        expect($cf->deviceModel())->toBeNull();
-        expect($cf->os())->toBeNull();
-        expect($cf->browser())->toBeNull();
-        expect($cf->isBot())->toBeNull();
+        expect($cf->isBot())->toBeTrue();
+        expect($cf->bot())->toBe('no_user_agent');
     });
 });
 

@@ -92,9 +92,14 @@ class CfRequest extends Request
         return $this->getClientTimezone();
     }
 
-    public function isBot(): ?bool
+    public function isBot(): bool
     {
-        return $this->getIsBot();
+        return $this->getAgent()->isBot();
+    }
+
+    public function bot(): string|false
+    {
+        return $this->getAgent()->bot();
     }
 
     public function botScore(): ?int
@@ -159,97 +164,97 @@ class CfRequest extends Request
     // Device and OS
     // ----------------------------------------------------------------------
 
-    public function isMobile(): ?bool
+    public function isMobile(): bool
     {
-        return $this->getAgent()?->isMobile();
+        return $this->getAgent()->isMobile();
     }
 
-    public function isTablet(): ?bool
+    public function isTablet(): bool
     {
-        return $this->getAgent()?->isTablet();
+        return $this->getAgent()->isTablet();
     }
 
-    public function isDesktop(): ?bool
+    public function isDesktop(): bool
     {
-        return $this->getAgent()?->isDesktop();
+        return $this->getAgent()->isDesktop();
     }
 
-    public function isTv(): ?bool
+    public function isTv(): bool
     {
-        return $this->getAgent()?->isTv();
+        return $this->getAgent()->isTv();
     }
 
-    public function deviceType(): ?string
+    public function deviceType(): string
     {
-        return $this->getAgent()?->deviceType();
+        return $this->getAgent()->deviceType();
     }
 
-    public function deviceBrand(): ?string
+    public function deviceBrand(): string
     {
-        return $this->getAgent()?->deviceBrand();
+        return $this->getAgent()->deviceBrand();
     }
 
-    public function deviceModel(): ?string
+    public function deviceModel(): string
     {
-        return $this->getAgent()?->deviceModel();
+        return $this->getAgent()->deviceModel();
     }
 
     // ----------------------------------------------------------------------
     // OS
     // ----------------------------------------------------------------------
 
-    public function os(): ?string
+    public function os(): string
     {
-        return $this->getAgent()?->os();
+        return $this->getAgent()->os();
     }
 
-    public function osName(): ?string
+    public function osName(): string
     {
-        return $this->getAgent()?->osName();
+        return $this->getAgent()->osName();
     }
 
-    public function osVersion(): ?string
+    public function osVersion(): string
     {
-        return $this->getAgent()?->osVersion();
+        return $this->getAgent()->osVersion();
     }
 
-    public function osFamily(): ?string
+    public function osFamily(): string
     {
-        return $this->getAgent()?->osFamily();
+        return $this->getAgent()->osFamily();
     }
 
-    public function osData(): ?array
+    public function osData(): array
     {
-        return $this->getAgent()?->osData();
+        return $this->getAgent()->osData();
     }
 
     // ----------------------------------------------------------------------
     // Browser
     // ----------------------------------------------------------------------
 
-    public function browser(): ?string
+    public function browser(): string
     {
-        return $this->getAgent()?->browser();
+        return $this->getAgent()->browser();
     }
 
-    public function browserName(): ?string
+    public function browserName(): string
     {
-        return $this->getAgent()?->browserName();
+        return $this->getAgent()->browserName();
     }
 
-    public function browserVersion(): ?string
+    public function browserVersion(): string
     {
-        return $this->getAgent()?->browserVersion();
+        return $this->getAgent()->browserVersion();
     }
 
-    public function browserFamily(): ?string
+    public function browserFamily(): string
     {
-        return $this->getAgent()?->browserFamily();
+        return $this->getAgent()->browserFamily();
     }
 
-    public function browserData(): ?array
+    public function browserData(): array
     {
-        return $this->getAgent()?->browserData();
+        return $this->getAgent()->browserData();
     }
 
     // ----------------------------------------------------------------------
@@ -354,11 +359,6 @@ class CfRequest extends Request
         return null;
     }
 
-    public function getIsBot(): ?bool
-    {
-        return $this->getAgent()?->isBot();
-    }
-
     public function getBotScore(): ?int
     {
         if ($this->headers->has('X-BOT-SCORE')) {
@@ -396,13 +396,10 @@ class CfRequest extends Request
         return null;
     }
 
-    protected function getAgent()
+    protected function getAgent(): Agent
     {
-        if (! $this->userAgent()) {
-            return null;
-        }
         if (! $this->agent) {
-            $this->agent = new Agent($this->userAgent());
+            $this->agent = new Agent($this->userAgent() ?? '');
         }
 
         return $this->agent;

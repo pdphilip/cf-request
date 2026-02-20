@@ -18,6 +18,7 @@
     "require": {
         "php": "^8.2",
         "illuminate/contracts": "^10.0||^11.0||^12.0",
+        "jaybizzle/crawler-detect": "^1.3",
         "matomo/device-detector": "^6.5",
         "pdphilip/omniterm": "^2",
         "spatie/laravel-package-tools": "^1.16"

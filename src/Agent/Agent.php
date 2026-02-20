@@ -5,6 +5,7 @@ namespace PDPhilip\CfRequest\Agent;
 use DeviceDetector\ClientHints;
 use DeviceDetector\DeviceDetector;
 use DeviceDetector\Parser\Device\AbstractDeviceParser;
+use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 class Agent
 {
@@ -32,7 +33,9 @@ class Agent
 
     protected string $deviceType = 'unknown';
 
-    protected bool $bot = false;
+    protected bool $isBot = false;
+
+    protected string|false $bot = false;
 
     public function __construct($userAgent)
     {
@@ -48,9 +51,7 @@ class Agent
 
         $this->_setBrowser();
         $this->_setOs();
-        if ($this->deviceDetector->isBot()) {
-            $this->bot = true;
-        }
+        $this->_detectBot($userAgent);
 
     }
 
@@ -76,6 +77,11 @@ class Agent
     }
 
     public function isBot(): bool
+    {
+        return $this->isBot;
+    }
+
+    public function bot(): string|false
     {
         return $this->bot;
     }
@@ -197,6 +203,30 @@ class Agent
         $os = $this->deviceDetector->getOs();
         if ($os) {
             $this->os = $os;
+        }
+    }
+
+    private function _detectBot(string $userAgent): void
+    {
+        if ($userAgent === '') {
+            $this->isBot = true;
+            $this->bot = 'no_user_agent';
+
+            return;
+        }
+
+        $crawlerDetect = new CrawlerDetect;
+        if ($crawlerDetect->isCrawler($userAgent)) {
+            $this->isBot = true;
+            $this->bot = $crawlerDetect->getMatches() ?: 'unknown';
+
+            return;
+        }
+
+        if ($this->deviceDetector->isBot()) {
+            $this->isBot = true;
+            $botInfo = $this->deviceDetector->getBot();
+            $this->bot = $botInfo['name'] ?? 'unknown';
         }
     }
 }
