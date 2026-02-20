@@ -41,7 +41,7 @@ class CfRequestStatusCommand extends Command
         });
 
         if (! $result || $result->isError()) {
-            $this->omni->statusError('API Error', $result?->message ?? 'Failed to connect to Cloudflare');
+            $this->omni->statusError('API Error', $result->message ?? 'Failed to connect to Cloudflare');
 
             return self::FAILURE;
         }

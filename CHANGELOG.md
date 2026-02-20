@@ -2,6 +2,81 @@
 
 All notable changes to `Cloudflare Laravel Request` will be documented in this file.
 
+## v3.0.0 - 2026-02-20
+
+### Summary
+
+Major rewrite: bot detection rebuilt with CrawlerDetect, country codes validated against ISO 3166-1, new CF verified bot category support, language/ASN headers, and idiot-proof Cloudflare API commands. All nullable return types on device/browser/OS methods tightened to non-nullable.
+
+**Full Changelog**: https://github.com/pdphilip/cf-request/compare/v2.0.4...v3.0.0
+
+---
+
+### Highlights
+
+- New: `verifiedBotCategory()` - returns CF verified bot category (`search_engine`, `advertising`, etc.) via `X-BOT-CAT` header (all CF plans)
+- New: `isVerifiedBot()` - true if CF reports a verified bot category
+- New: `bot()` - returns bot name string or `false`
+- New: `isTor()` - detects Tor network traffic (`T1` country code)
+- New: `language()` - primary language from `X-LANG` CF header with Laravel `Accept-Language` fallback
+- New: `languages()` - all accepted languages from `Accept-Language` header
+- New: `botScore()` / `botScoreData()` - CF Bot Management score (Enterprise; reads `X-BOT-SCORE` if manually configured)
+- New: `cf-request:status` command - grouped table showing which CF transform rule headers are configured
+- Improved: `cf-request:headers` command now updates existing rules via PATCH instead of silently skipping
+- Improved: `country()` validates against ISO 3166-1 Alpha-2; non-country codes (`T1`, `XX`) return `null`
+- Improved: All geo methods (`city()`, `region()`, `lat()`, etc.) gate on valid country - no partial geo data
+- Improved: `isBot()` rebuilt with [CrawlerDetect](https://github.com/JayBizzle/Crawler-Detect) (1,400+ patterns) as primary, DeviceDetector as fallback
+- Improved: `asn()` now returns `?int` instead of `?string`
+- Removed: `threatScore()` - Cloudflare deprecated this; always returned 0 since v2.0.3
+- Removed: `lang()` - replaced by `language()`
+- Removed: All internal public getters (`getClientCountry()`, `getIsBot()`, `getASN()`, `getLang()`, etc.)
+
+---
+
+### Breaking changes
+
+**Removed methods:**
+- `threatScore()` - removed entirely (was deprecated in v2.0.3)
+- `lang()` - renamed to `language()`
+- `getClientCountry()`, `getClientCity()`, `getClientRegion()`, `getClientContinent()`, `getClientPostalCode()`, `getClientLat()`, `getClientLon()`, `getClientGeo()`, `getClientTimezone()`, `getIsBot()`, `getASN()`, `getLang()`, `getReferer()`, `getRefererDomain()` - internal getters removed from public API
+
+**Return type changes:**
+- `isBot()`: `?bool` -> `bool`
+- `isMobile()`, `isTablet()`, `isDesktop()`, `isTv()`: `?bool` -> `bool`
+- `deviceType()`, `deviceBrand()`, `deviceModel()`: `?string` -> `string`
+- `os()`, `osName()`, `osVersion()`, `osFamily()`: `?string` -> `string`
+- `osData()`: `?array` -> `array`
+- `browser()`, `browserName()`, `browserVersion()`, `browserFamily()`: `?string` -> `string`
+- `browserData()`: `?array` -> `array`
+- `asn()`: `?string` -> `?int`
+- `getHeader()`: `mixed` -> `?string`
+
+**Behavioural changes:**
+- `country()` now validates against ISO 3166-1 whitelist. Non-standard codes like `T1` (Tor) and `XX` (unknown) return `null`. Use `isTor()` to detect Tor traffic specifically.
+- All geo methods return `null` when `country()` is `null`
+
+---
+
+### Upgrade guide
+
+1. **Composer**
+   ```bash
+   composer require pdphilip/cf-request:^3.0
+   ```
+
+2. **Cloudflare transform rules** - run `php artisan cf-request:headers` to add new headers:
+   - `X-BOT-CAT` -> `cf.verified_bot_category`
+   - `X-LANG` -> `http.request.accepted_languages[0]`
+   - `X-ASN` -> `ip.src.asnum` (if not already set)
+   - The command now updates existing rules automatically
+
+3. **Code changes**
+   - Replace `$request->lang()` with `$request->language()`
+   - Remove any `$request->threatScore()` logic
+   - If you used `$request->asn()` as a string, note it now returns `?int`
+   - If you null-checked device/browser methods (`$request->isMobile() === null`), that's no longer possible - they always return a value
+   - If you relied on `country()` returning `T1` for Tor, use `$request->isTor()` instead
+
 ## v2.0.4 - 2026-01-23
 
 ### What's Changed
