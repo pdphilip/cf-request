@@ -53,12 +53,12 @@ class Agent
 
         $client = $this->deviceDetector->getClient();
         if ($client) {
-            $this->browser = $client;
+            $this->browser = array_merge($this->browser, $client);
         }
 
         $os = $this->deviceDetector->getOs();
         if ($os) {
-            $this->os = $os;
+            $this->os = array_merge($this->os, $os);
         }
 
         $this->detectBot($userAgent);
