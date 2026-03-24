@@ -2,6 +2,27 @@
 
 All notable changes to `Cloudflare Laravel Request` will be documented in this file.
 
+## v3.1.0 - 2026-03-24
+
+This release is compatible with Laravel 11, 12 & 13
+
+### Added
+
+- **Laravel 13 support**
+- Composer test scripts for per-version testing: `composer test:l11`, `composer test:l12`, `composer test:l13`, `composer test:all`
+
+### Changed
+
+- Dropped Laravel 10 support (EOL)
+- `pdphilip/omniterm` bumped to `^3.0`
+- CI matrix updated: PHP 8.3/8.4, Laravel 11/12/13
+
+### Fixed
+
+- Replaced `getBody()->getContents()` with `->body()` on HTTP client responses (correct Laravel API, fixes Larastan 3 analysis)
+
+**Full Changelog**: https://github.com/pdphilip/cf-request/compare/v3.0.1...v3.1.0
+
 ## v3.0.1 - 2026-03-03
 
 ### Fixed

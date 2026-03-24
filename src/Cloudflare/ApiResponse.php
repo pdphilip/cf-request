@@ -40,7 +40,7 @@ class ApiResponse
     {
         $api = new ApiResponse;
         $fetch = Http::asJson()->withHeaders($api->requestHeaders())->get($api->endPoint($endpoint));
-        $api->parseResponse($fetch->getBody()->getContents());
+        $api->parseResponse($fetch->body());
 
         return $api;
 
@@ -50,7 +50,7 @@ class ApiResponse
     {
         $api = new ApiResponse;
         $fetch = Http::asJson()->withHeaders($api->requestHeaders())->delete($api->endPoint($endpoint));
-        $api->parseResponse($fetch->getBody()->getContents());
+        $api->parseResponse($fetch->body());
 
         return $api;
     }
@@ -59,7 +59,7 @@ class ApiResponse
     {
         $api = new ApiResponse;
         $fetch = Http::asJson()->withHeaders($api->requestHeaders())->post($api->endPoint($endpoint), $payload);
-        $api->parseResponse($fetch->getBody()->getContents());
+        $api->parseResponse($fetch->body());
 
         return $api;
     }
@@ -68,7 +68,7 @@ class ApiResponse
     {
         $api = new ApiResponse;
         $fetch = Http::asJson()->withHeaders($api->requestHeaders())->patch($api->endPoint($endpoint), $payload);
-        $api->parseResponse($fetch->getBody()->getContents());
+        $api->parseResponse($fetch->body());
 
         return $api;
     }
