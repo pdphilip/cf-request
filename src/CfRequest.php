@@ -317,7 +317,7 @@ class CfRequest extends Request
     }
 
     // ----------------------------------------------------------------------
-    // Request Overrides — prioritize CF headers over standard HTTP
+    // Request Overrides - prioritize CF headers over standard HTTP
     // ----------------------------------------------------------------------
 
     /** {@inheritDoc} */
@@ -334,7 +334,7 @@ class CfRequest extends Request
         return $this->headers->get('X-AGENT') ?? $this->headers->get('User-Agent');
     }
 
-    // Trusted proxy delegates — must use originalRequest for trusted values
+    // Trusted proxy delegates - must use originalRequest for trusted values
 
     public function getBaseUrl(): string
     {

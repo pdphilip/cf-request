@@ -134,12 +134,12 @@ This release adds Cloudflare ASN and primary language support, improves user-age
 
 ### Highlights
 
-- New: `CfRequest::asn()` — returns the Autonomous System Number (ASN) when provided via Cloudflare headers.
-- New: `CfRequest::lang()` — returns the browser's primary accepted language (from Cloudflare headers).
-- New: `getHeader($key)` — convenience getter to fetch arbitrary header values from the request.
+- New: `CfRequest::asn()` - returns the Autonomous System Number (ASN) when provided via Cloudflare headers.
+- New: `CfRequest::lang()` - returns the browser's primary accepted language (from Cloudflare headers).
+- New: `getHeader($key)` - convenience getter to fetch arbitrary header values from the request.
 - Improved: Agent detection now exposes `isBot()` and uses device-detector fallback when Cloudflare headers are not definitive.
 - Improved: Browser and OS name formatting now handles missing version parts gracefully.
-- Deprecated: `CfRequest::threatScore()` — Cloudflare no longer provides the mapped threat score; the method remains for backwards compatibility and now returns 0.
+- Deprecated: `CfRequest::threatScore()` - Cloudflare no longer provides the mapped threat score; the method remains for backwards compatibility and now returns 0.
 - Documentation updated with new header mappings, examples, and badges.
 
 ---
@@ -187,7 +187,7 @@ This release adds Cloudflare ASN and primary language support, improves user-age
     - Examples:
 
         - Before: if ($request->threatScore() > 50) { ... }
-        - After: // threatScore deprecated — consider alternative logic, e.g.:
+        - After: // threatScore deprecated - consider alternative logic, e.g.:
             - if (in_array($request->asn(), $blockedAsns())) { ... }
             - or rely on Cloudflare Firewall rules for threat-based blocking.
 
